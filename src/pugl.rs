@@ -451,6 +451,12 @@ pub trait PuglViewTrait {
     /// Called when the view is requested to close by the window system
     fn close_request(&mut self);
 
+    /// Called when the view recieves the focus
+    fn focus_in(&mut self) -> Status { Status::Success }
+
+    /// Called when the view gives the focus away
+    fn focus_out(&mut self) -> Status { Status::Success }
+
     /// set the handle of the windows system's view
     fn set_view (&mut self, view: PuglViewFFI);
 
@@ -543,7 +549,13 @@ fn event_handler<T: PuglViewTrait> (view_ptr: *mut p::PuglView, event_ptr: *cons
         },
         p::PuglEventType_PUGL_SCROLL => {
             Event { data: EventType::Scroll(Scroll::from (ev.scroll)), context: EventContext::from (ev.scroll) }
-        }
+        },
+	p::PuglEventType_PUGL_FOCUS_IN => {
+	    return handle.focus_in() as p::PuglStatus
+	},
+	p::PuglEventType_PUGL_FOCUS_OUT => {
+	    return handle.focus_out() as p::PuglStatus
+	},
         p::PuglEventType_PUGL_CLOSE => {
             handle.close_request ();
             return p::PuglStatus_PUGL_SUCCESS
