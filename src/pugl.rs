@@ -483,6 +483,11 @@ pub trait PuglViewTrait {
         unsafe { Status::from(p::puglSetMinSize(self.view(), width, height)) }
     }
 
+    /// Makes the view resizable. To be called before show_window()
+    fn make_resizable(&self) -> Status {
+	unsafe { Status::from(p::puglSetViewHint(self.view(), p::PuglViewHint_PUGL_RESIZABLE, true as i32)) }
+    }
+
     /// set the window title
     fn set_window_title (&self, title: &str) -> Status {
         unsafe { Status::from(p::puglSetWindowTitle(self.view(), title.as_ptr() as *const i8)) }
@@ -610,7 +615,6 @@ impl<T: PuglViewTrait> PuglView<T> {
             p::puglSetHandle(view.instance, handle as p::PuglHandle);
             p::puglSetEventFunc(view.instance, Some(event_handler::<T>));
 	    p::puglSetBackend(view.instance, p::puglCairoBackend());
-            p::puglSetViewHint(view.instance, p::PuglViewHint_PUGL_RESIZABLE, true as i32);
             p::puglSetViewHint(view.instance, p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT, true as i32);
         }
         view
