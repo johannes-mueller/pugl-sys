@@ -516,6 +516,16 @@ pub trait PuglViewTrait {
     fn update (&self, timeout: f64) -> Status {
         unsafe { Status::from(p::puglUpdate(self.world(), timeout)) }
     }
+
+    fn start_timer(&self, id: usize, timeout: f64) -> Status {
+	unsafe { Status::from(p::puglStartTimer(self.view(), id, timeout)) }
+    }
+
+    fn stop_timer(&self, id: usize) -> Status {
+	unsafe { Status::from(p::puglStopTimer(self.view(), id)) }
+    }
+
+    fn timer_event(&mut self, _id: usize) -> Status { Status::Success }
 }
 
 /// A struct for a pugl "app" object
@@ -556,6 +566,9 @@ fn event_handler<T: PuglViewTrait> (view_ptr: *mut p::PuglView, event_ptr: *cons
 	p::PuglEventType_PUGL_FOCUS_OUT => {
 	    return handle.focus_out() as p::PuglStatus
 	},
+	p::PuglEventType_PUGL_TIMER => {
+	    return handle.timer_event(ev.timer.id) as p::PuglStatus
+	}
         p::PuglEventType_PUGL_CLOSE => {
             handle.close_request ();
             return p::PuglStatus_PUGL_SUCCESS
