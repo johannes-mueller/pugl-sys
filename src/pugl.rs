@@ -271,7 +271,7 @@ impl From<p::PuglEventButton> for EventContext {
 #[derive(Copy, Clone)]
 pub struct MotionContext {
     /// Keyboard modifiers
-    pub state: Modifier,
+    pub modifiers: Modifier,
     /// True iff this event is a motion hint
     pub is_hint: bool,
     /// True iff this is the focus view
@@ -281,7 +281,7 @@ pub struct MotionContext {
 impl From<p::PuglEventMotion> for MotionContext {
     fn from (me: p::PuglEventMotion) -> MotionContext {
         MotionContext {
-            state: me.state,
+            modifiers: me.state,
             is_hint: me.isHint,
             focus: me.focus
         }
