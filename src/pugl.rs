@@ -508,6 +508,16 @@ pub trait PuglViewTrait {
         unsafe { Status::from(p::puglPostRedisplay(self.view())) }
     }
 
+    fn post_redisplay_rect(&self, pos: Coord, size: Size) -> Status {
+        let p_rect = p::PuglRect {
+            x: pos.x,
+            y: pos.y,
+            width: size.w,
+            height: size.h
+        };
+        unsafe { Status::from(p::puglPostRedisplayRect(self.view(), p_rect)) }
+    }
+
     /// set the position and size of the view
     fn set_frame (&self, width: f64, height: f64) -> Status {
         unsafe { Status::from(p::puglSetFrame(self.view(), p::PuglRect { x:0.0, y:0.0, width, height})) }
