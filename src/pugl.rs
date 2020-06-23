@@ -21,7 +21,18 @@ pub struct Coord {
     /// x coordinate
     pub x: f64,
     /// y coordinate
-    pub y: f64 }
+    pub y: f64
+}
+
+impl Coord {
+    pub fn scale(&self, factor: f64) -> Coord {
+        Coord {
+            x: self.x * factor,
+            y: self.y * factor,
+        }
+    }
+}
+
 
 impl Add for Coord {
     type Output = Coord;
@@ -49,7 +60,17 @@ pub struct Size {
     /// width
     pub w: f64,
     /// height
-    pub h: f64 }
+    pub h: f64
+}
+
+impl Size {
+    pub fn scale(&self, factor: f64) -> Size {
+        Size {
+            w: self.w * factor,
+            h: self.h * factor
+        }
+    }
+}
 
 impl Add for Size {
     type Output = Size;
@@ -384,6 +405,20 @@ impl Event {
             EventType::KeyPress (k) => Some (k),
             _ => None
         }
+    }
+
+    pub fn pos(&self) -> Coord {
+        self.context.pos
+    }
+
+    pub fn scale_pos(self, scale_factor: f64) -> Event {
+        let mut ev = self;
+        ev.context.pos = self.context.pos.scale(scale_factor);
+        ev
+    }
+
+    pub fn pos_root(&self) -> Coord {
+        self.context.pos_root
     }
 }
 
