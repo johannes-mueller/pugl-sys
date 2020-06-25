@@ -26,7 +26,7 @@ fn main() {
     println!("cargo:rustc-link-search=pugl/build");
     println!("cargo:rustc-link-lib=static=pugl_x11-0");
     println!("cargo:rustc-link-lib=static=pugl_x11_cairo-0");
-    println!("cargo:rustc-flags=-l cairo -l GLU -l GL -lX11 -lXext -lXrandr");
+    println!("cargo:rustc-flags=-l cairo -l GLU -l GL -lX11 -lXext -lXrandr -lXcursor");
 
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
