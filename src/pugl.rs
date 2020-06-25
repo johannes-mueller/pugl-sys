@@ -422,6 +422,33 @@ impl Event {
     }
 }
 
+/// Available mouse cursors
+#[derive(Copy, Clone)]
+pub enum Cursor {
+    Arrow,
+    Caret,
+    CrossHair,
+    Hand,
+    No,
+    LeftRight,
+    UpDown
+}
+
+impl From<Cursor> for p::PuglCursor {
+    fn from(c: Cursor) -> p::PuglCursor {
+        match c {
+            Cursor::Arrow => p::PuglCursor_PUGL_CURSOR_ARROW,
+            Cursor::Caret => p::PuglCursor_PUGL_CURSOR_CARET,
+            Cursor::CrossHair => p::PuglCursor_PUGL_CURSOR_CROSSHAIR,
+            Cursor::Hand => p::PuglCursor_PUGL_CURSOR_HAND,
+            Cursor::No => p::PuglCursor_PUGL_CURSOR_NO,
+            Cursor::LeftRight => p::PuglCursor_PUGL_CURSOR_LEFT_RIGHT,
+            Cursor::UpDown => p::PuglCursor_PUGL_CURSOR_UP_DOWN,
+        }
+    }
+}
+
+
 pub type PuglViewFFI = *mut p::PuglView;
 
 /// "Return status code.
@@ -541,6 +568,11 @@ pub trait PuglViewTrait {
     /// can be called to show the view
     fn show_window (&self) -> Status {
         unsafe { Status::from(p::puglShowWindow(self.view())) }
+    }
+
+    /// Sets the mouse cursor
+    fn set_cursor(&self, c: Cursor) -> Status {
+        unsafe { Status::from(p::puglSetCursor(self.view(), c.into())) }
     }
 
     /// Update by processing events from the window system.
