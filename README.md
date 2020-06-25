@@ -17,8 +17,9 @@ host would clash.
 
 ## Status
 
-Early prototype stage. Not all features of pugl are available yet. Currently
-only tested on Linux/X11.
+Beta testing stage. Not all features of pugl are available yet. Currently
+only tested on Linux/X11. Rust hackers interested in programming small
+embeddable GUIs are encouraged to try it out.
 
 
 ## How to use
@@ -45,14 +46,14 @@ You need to have the following stuff installed
 This crate does not have any examples. There is the
 [pugl-ui](https://github.com/johannes-mueller/pugl-ui) crate that is a stub of
 a GUI toolkit implementing widget layout and event propagation. Check this out
-for examples.
+for very basic examples.
 
 
 ## Todo
 
-Still a lot.
-
-* Make available the remaining features from pugl.
+* Make available the remaining features from pugl. Many of them are probably
+  quite easy, as only function call needs to be forwarded to `PuglView`. I
+  usually implement features once I need them. PRs welcome.
 
 * Figure out how to distribute it via https://crates.io with all the build
   dependencies (python, waf)
