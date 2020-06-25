@@ -3,6 +3,12 @@ name = "pugl-sys"
 version = "0.1.0"
 authors = ["Johannes Mueller <github@johannes-mueller.org>"]
 edition = "2018"
+description = "A Rust wrapper for pugl"
+license = "ISC"
+keywords = ["GUI", "LV2"]
+homepage = "https://github.com/johannes-mueller/pugl-sys"
+repository = "https://github.com/johannes-mueller/pugl-sys"
+readme = "README.md"
 
 [dependencies]
 bitflags = "1.2.1"
