@@ -11,6 +11,7 @@ fn main() {
     Command::new("python")
         .current_dir("pugl")
         .env("CFLAGS", "-fPIC")
+	.arg("-B")
         .arg("waf")
         .arg("configure")
         .arg(format!("--out={}", out_path.to_str().unwrap()))
@@ -20,6 +21,7 @@ fn main() {
     Command::new("python")
         .current_dir("pugl")
         .env("CFLAGS", "-fPIC")
+	.arg("-B")
         .arg("waf")
         .arg("build")
         .status()
@@ -45,9 +47,5 @@ fn main() {
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 
-
-    let _ = fs::remove_dir_all("pugl/waflib/__pycache__");
-    let _ = fs::remove_dir_all("pugl/waflib/Tools/__pycache__");
-    let _ = fs::remove_dir_all("pugl/waflib/extras/__pycache__");
     let _ = fs::remove_file("pugl/.lock-waf_linux_build");
 }
