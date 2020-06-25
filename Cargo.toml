@@ -6,6 +6,7 @@ edition = "2018"
 description = "A Rust wrapper for pugl"
 license = "ISC"
 keywords = ["GUI", "LV2"]
+categories = ["api-bindings", "gui"]
 homepage = "https://github.com/johannes-mueller/pugl-sys"
 repository = "https://github.com/johannes-mueller/pugl-sys"
 readme = "README.md"
