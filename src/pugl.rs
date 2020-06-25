@@ -6,9 +6,6 @@ use std::str;
 use std::char;
 use std::marker::PhantomData;
 
-use cairo;
-use cairo_sys;
-
 mod p {
     include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 }
@@ -677,8 +674,7 @@ impl<T: PuglViewTrait> PuglView<T> {
     pub fn make_view(mut handle: Box<T>, parent_window: *mut std::ffi::c_void) -> Box<Self> {
         let view = Box::new(PuglView {
             instance: unsafe {
-                let inst = p::puglNewView(p::puglNewWorld(p::PuglWorldType_PUGL_PROGRAM, 0));
-                inst
+                p::puglNewView(p::puglNewWorld(p::PuglWorldType_PUGL_PROGRAM, 0))
             },
 	    ui_type: PhantomData
         });
@@ -698,7 +694,7 @@ impl<T: PuglViewTrait> PuglView<T> {
     }
 
     /// returns a handle to the object T
-    pub fn handle(&self) -> &mut T {
+    pub fn handle(&mut self) -> &mut T {
 	unsafe {
 	    &mut *(p::puglGetHandle(self.instance) as *mut T) as &mut T
 	}
