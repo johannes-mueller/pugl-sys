@@ -18,7 +18,7 @@ host would clash.
 ## Status
 
 Early prototype stage. Not all features of pugl are available yet. Currently
-only tested on Linux/X11
+only tested on Linux/X11.
 
 
 ## How to use
@@ -29,13 +29,14 @@ You need to have the following stuff installed
 
 * python3 (to make waf, the build system of the pugl library run)
 * a C compiler and the usual libraries to compile X11 apps
+* clang as the `pugl` bindings are accessed through `bindgen`
 * developer files of cairo
 
 
 ### Build
 
 * Clone this repo and `cd` into it.
-* Setup the `pugl` submodule by `git submodule update --init --recursive
+* Setup the `pugl` submodule by `git submodule update --init --recursive`
 * Run `cargo build`
 
 
