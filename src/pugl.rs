@@ -551,9 +551,6 @@ pub trait PuglViewTrait {
     /// Called when a timer launched by `::set_timer()` finished.
     fn timer_event(&mut self, _id: usize) -> Status { Status::Success }
 
-    /// Sets the handle of the windows system's view
-    fn set_view (&mut self, view: PuglViewFFI);
-
     /// Returns a handle to the window system's view
     fn view (&self) -> PuglViewFFI;
 
@@ -779,6 +776,8 @@ pub trait PuglViewTrait {
     fn stop_timer(&self, id: usize) -> Status {
         unsafe { Status::from(p::puglStopTimer(self.view(), id)) }
     }
+
+    fn new(view_ptr: *mut p::PuglView) -> Box<Self>;
 }
 
 /// A struct for a pugl "app" object
@@ -845,20 +844,20 @@ fn event_handler<T: PuglViewTrait> (view_ptr: *mut p::PuglView, event_ptr: *cons
 impl<T: PuglViewTrait> PuglView<T> {
     /// Sets up a new PuglView for a heap allocated object of T implementing PuglViewTrait
     ///
-    pub fn make_view(mut handle: Box<T>, parent_window: *mut std::ffi::c_void) -> Box<Self> {
-        let view = Box::new(PuglView {
+    pub fn new(parent_window: *mut std::ffi::c_void) -> Box<Self> {
+        let view = Box::new(PuglView::<T> {
             instance: unsafe {
                 p::puglNewView(p::puglNewWorld(p::PuglWorldType_PUGL_PROGRAM, 0))
             },
             ui_type: PhantomData
         });
-        handle.set_view(view.instance);
-        let handle = Box::into_raw(handle) as *const T;
+
+        let ui =T::new(view.instance);
         unsafe {
             if !parent_window.is_null() {
                 p::puglSetParentWindow(view.instance, parent_window as usize);
             }
-            p::puglSetHandle(view.instance, handle as p::PuglHandle);
+            p::puglSetHandle(view.instance, Box::into_raw(ui) as p::PuglHandle);
             p::puglSetEventFunc(view.instance, Some(event_handler::<T>));
             p::puglSetBackend(view.instance, p::puglCairoBackend());
             p::puglSetViewHint(view.instance, p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT, true as i32);

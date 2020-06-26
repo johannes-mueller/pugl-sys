@@ -30,6 +30,16 @@
 //!
 //! // Make the UI struct implement the PuglViewTrait
 //! impl PuglViewTrait for UI {
+//!     fn new(view: PuglViewFFI) -> Box<Self> {
+//!         Box::new(Self {
+//!             view,
+//!             red: 1.0,
+//!             green: 0.0,
+//!             width: 800.0,
+//!             height: 600.0,
+//!             close_requested: false
+//!         })
+//!     }
 //!     // exposure events
 //!     fn exposed(&mut self, _expose: &ExposeArea, cr: &cairo::Context) {
 //!         let radius = self.width.min(self.height) / 3.0;
@@ -69,11 +79,6 @@
 //!         self.close_requested = true;
 //!     }
 //!
-//!     // setter and getter for the handle
-//!     fn set_view(&mut self, view: PuglViewFFI) {
-//!         self.view = view;
-//!     }
-//!
 //!     fn view(&self) -> PuglViewFFI {
 //!         self.view
 //!     }
@@ -81,19 +86,8 @@
 //!
 //! fn main() {
 //!     // Request a PuglView passing an initialized UI struct in a Box
-//!     let mut view = PuglView::make_view(
-//!         Box::new(UI {
-//!             view: std::ptr::null_mut(),
-//!             red: 1.0,
-//!             green: 0.0,
-//!             width: 800.0,
-//!             height: 600.0,
-//!             close_requested: false
-//!         }),
-//!         std::ptr::null_mut()
-//!     );
-//!
-//!     // get the UI handle back from the view and do some window initialization
+//!     let mut view = PuglView::<UI>::new(std::ptr::null_mut());
+//!     // borrow the UI handle from the view and do some window initialization
 //!     let ui = view.handle();
 //!     ui.set_window_title("Test Pugl");
 //!     ui.make_resizable();
