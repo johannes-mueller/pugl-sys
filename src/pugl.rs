@@ -1,3 +1,4 @@
+
 #![allow(dead_code)]
 #![allow(unused_macros)]
 
@@ -29,7 +30,6 @@ impl Coord {
         }
     }
 }
-
 
 impl Add for Coord {
     type Output = Coord;
@@ -79,6 +79,38 @@ impl Add for Size {
         }
     }
 }
+
+
+/// A rectangle
+///
+/// This This is used to describe things like view position and size.  Pugl generally
+/// uses coordinates where the top left corner is 0,0.
+#[derive(Copy, Clone, Default, Debug)]
+pub struct Rect {
+    pub pos: Coord,
+    pub size: Size
+}
+
+impl From<p::PuglRect> for Rect {
+    fn from(pr: p::PuglRect) -> Rect {
+        Rect {
+            pos: Coord { x: pr.x, y: pr.y },
+            size: Size { w: pr.width, h: pr.height }
+        }
+    }
+}
+
+impl From <Rect> for p::PuglRect {
+    fn from(r: Rect) -> p::PuglRect {
+        p::PuglRect {
+            x: r.pos.x,
+            y: r.pos.y,
+            width: r.size.w,
+            height: r.size.h
+        }
+    }
+}
+
 
 /// The context of a GUI event
 #[derive(Copy, Clone, Default)]
@@ -138,9 +170,9 @@ pub enum SpecialKey {
 impl From<p::PuglKey> for SpecialKey {
     fn from (k: p::PuglKey) -> SpecialKey {
         match k {
-	    p::PuglKey_PUGL_KEY_BACKSPACE => SpecialKey::Backspace,
-	    p::PuglKey_PUGL_KEY_ESCAPE => SpecialKey::Escape,
-	    p::PuglKey_PUGL_KEY_DELETE => SpecialKey::Delete,
+            p::PuglKey_PUGL_KEY_BACKSPACE => SpecialKey::Backspace,
+            p::PuglKey_PUGL_KEY_ESCAPE => SpecialKey::Escape,
+            p::PuglKey_PUGL_KEY_DELETE => SpecialKey::Delete,
             p::PuglKey_PUGL_KEY_F1 => SpecialKey::F1,
             p::PuglKey_PUGL_KEY_F2 => SpecialKey::F2,
             p::PuglKey_PUGL_KEY_F3 => SpecialKey::F3,
@@ -163,20 +195,20 @@ impl From<p::PuglKey> for SpecialKey {
             p::PuglKey_PUGL_KEY_END => SpecialKey::End,
             p::PuglKey_PUGL_KEY_INSERT => SpecialKey::Insert,
             p::PuglKey_PUGL_KEY_SHIFT_L => SpecialKey::ShiftL,
-	    p::PuglKey_PUGL_KEY_SHIFT_R => SpecialKey::ShiftR,
+            p::PuglKey_PUGL_KEY_SHIFT_R => SpecialKey::ShiftR,
             p::PuglKey_PUGL_KEY_CTRL_L => SpecialKey::CtrlL,
             p::PuglKey_PUGL_KEY_ALT_L => SpecialKey::AltL,
             p::PuglKey_PUGL_KEY_CTRL_R => SpecialKey::CtrlR,
             p::PuglKey_PUGL_KEY_ALT_R => SpecialKey::AltR,
             p::PuglKey_PUGL_KEY_SUPER_L => SpecialKey::SuperL,
             p::PuglKey_PUGL_KEY_SUPER_R => SpecialKey::SuperR,
-	    p::PuglKey_PUGL_KEY_MENU => SpecialKey::KeyMenu,
-	    p::PuglKey_PUGL_KEY_CAPS_LOCK => SpecialKey::KeyCapsLock,
-	    p::PuglKey_PUGL_KEY_SCROLL_LOCK => SpecialKey::KeyScrollLock,
-	    p::PuglKey_PUGL_KEY_NUM_LOCK => SpecialKey::KeyNumLock,
-	    p::PuglKey_PUGL_KEY_PRINT_SCREEN => SpecialKey::KeyPrintScreen,
-	    p::PuglKey_PUGL_KEY_PAUSE => SpecialKey::KeyPause,
-	    _ => SpecialKey::None
+            p::PuglKey_PUGL_KEY_MENU => SpecialKey::KeyMenu,
+            p::PuglKey_PUGL_KEY_CAPS_LOCK => SpecialKey::KeyCapsLock,
+            p::PuglKey_PUGL_KEY_SCROLL_LOCK => SpecialKey::KeyScrollLock,
+            p::PuglKey_PUGL_KEY_NUM_LOCK => SpecialKey::KeyNumLock,
+            p::PuglKey_PUGL_KEY_PRINT_SCREEN => SpecialKey::KeyPrintScreen,
+            p::PuglKey_PUGL_KEY_PAUSE => SpecialKey::KeyPause,
+            _ => SpecialKey::None
         }
     }
 }
@@ -477,20 +509,20 @@ pub enum Status {
 
 impl From<p::PuglStatus> for Status {
     fn from(ps: p::PuglStatus) -> Status {
-	match ps {
-	    p::PuglStatus_PUGL_SUCCESS => Status::Success ,
-	    p::PuglStatus_PUGL_FAILURE => Status::Failure ,
-	    p::PuglStatus_PUGL_UNKNOWN_ERROR => Status::UnknownError ,
-	    p::PuglStatus_PUGL_BAD_BACKEND => Status::BadBackend ,
-	    p::PuglStatus_PUGL_BAD_PARAMETER => Status::BadParameter ,
-	    p::PuglStatus_PUGL_BACKEND_FAILED => Status::BackendFailed ,
-	    p::PuglStatus_PUGL_REGISTRATION_FAILED => Status::RegistrationFailed ,
-	    p::PuglStatus_PUGL_REALIZE_FAILED => Status::RealizeFailed ,
-	    p::PuglStatus_PUGL_SET_FORMAT_FAILED => Status::SetFormatFailed ,
-	    p::PuglStatus_PUGL_CREATE_CONTEXT_FAILED => Status::CreateContextFailed ,
-	    p::PuglStatus_PUGL_UNSUPPORTED_TYPE => Status::UnsupportedType,
-	    _ => Status::UnsupportedType
-	}
+        match ps {
+            p::PuglStatus_PUGL_SUCCESS => Status::Success ,
+            p::PuglStatus_PUGL_FAILURE => Status::Failure ,
+            p::PuglStatus_PUGL_UNKNOWN_ERROR => Status::UnknownError ,
+            p::PuglStatus_PUGL_BAD_BACKEND => Status::BadBackend ,
+            p::PuglStatus_PUGL_BAD_PARAMETER => Status::BadParameter ,
+            p::PuglStatus_PUGL_BACKEND_FAILED => Status::BackendFailed ,
+            p::PuglStatus_PUGL_REGISTRATION_FAILED => Status::RegistrationFailed ,
+            p::PuglStatus_PUGL_REALIZE_FAILED => Status::RealizeFailed ,
+            p::PuglStatus_PUGL_SET_FORMAT_FAILED => Status::SetFormatFailed ,
+            p::PuglStatus_PUGL_CREATE_CONTEXT_FAILED => Status::CreateContextFailed ,
+            p::PuglStatus_PUGL_UNSUPPORTED_TYPE => Status::UnsupportedType,
+            _ => Status::UnsupportedType
+        }
     }
 }
 
@@ -516,22 +548,37 @@ pub trait PuglViewTrait {
     /// Called when the view gives the focus away
     fn focus_out(&mut self) -> Status { Status::Success }
 
-    /// set the handle of the windows system's view
+    /// Called when a timer launched by `::set_timer()` finished.
+    fn timer_event(&mut self, _id: usize) -> Status { Status::Success }
+
+    /// Sets the handle of the windows system's view
     fn set_view (&mut self, view: PuglViewFFI);
 
-    /// returns a handle to the window system's view
+    /// Returns a handle to the window system's view
     fn view (&self) -> PuglViewFFI;
 
-    /// returns a pointer to the PugleWorld
+    /// Returns a pointer to the PugleWorld
     fn world (&self) -> *mut p::PuglWorld {
-	unsafe { p::puglGetWorld(self.view() as *mut p::PuglView) }
+        unsafe { p::puglGetWorld(self.view() as *mut p::PuglView) }
     }
 
-    /// can be called to ask for a redisplay of the view's contents
+    /// Request a redisplay for the entire view.
+    ///
+    /// This will cause an expose event to be dispatched later. If
+    /// called from within the event handler, the expose should arrive
+    /// at the end of the current event loop iteration, though this is
+    /// not strictly guaranteed on all platforms. If called elsewhere,
+    /// an expose will be enqueued to be processed in the next event
+    /// loop iteration.
     fn post_redisplay (&self) -> Status {
         unsafe { Status::from(p::puglPostRedisplay(self.view())) }
     }
 
+    /// Request a redisplay of the given rectangle within the view.
+    ///
+    /// This has the same semantics as puglPostRedisplay(), but allows
+    /// giving a precise region for redrawing only a portion of the
+    /// view.
     fn post_redisplay_rect(&self, pos: Coord, size: Size) -> Status {
         let p_rect = p::PuglRect {
             x: pos.x,
@@ -542,69 +589,196 @@ pub trait PuglViewTrait {
         unsafe { Status::from(p::puglPostRedisplayRect(self.view(), p_rect)) }
     }
 
-    /// set the position and size of the view
-    fn set_frame (&self, width: f64, height: f64) -> Status {
-        unsafe { Status::from(p::puglSetFrame(self.view(), p::PuglRect { x:0.0, y:0.0, width, height})) }
+    ///  Get the current position and size of the view.
+    ///
+    ///  The position is in screen coordinates with an upper left origin.
+    fn get_frame(&self) -> Rect {
+        unsafe { p::puglGetFrame(self.view()).into() }
     }
 
-    /// set the minimum size of the view
+    /// Set the current position and size of the view.
+    ///
+    /// The position is in screen coordinates with an upper left origin.
+    fn set_frame (&self, frame: Rect) -> Status {
+        unsafe { Status::from(p::puglSetFrame(self.view(), frame.into())) }
+    }
+
+    /// Set the default size of the view.
+    ///
+    /// This should be called before `::show_window()` and `::realize()` to
+    /// set the default size of the view, which will be the initial
+    /// size of the window if this is a top level view.
+    fn set_default_size(&self, width: i32, height: i32) -> Status {
+        unsafe { Status::from(p::puglSetDefaultSize(self.view(), width, height)) }
+    }
+
+    /// Set the minimum size of the view.
+    ///
+    /// If an initial minimum size is known, this should be called
+    /// before `::realize()` and `::show_window()` to avoid stutter,
+    /// though it can be called afterwards as well.
     fn set_min_size (&self, width: i32, height: i32) -> Status {
         unsafe { Status::from(p::puglSetMinSize(self.view(), width, height)) }
     }
 
-    /// Makes the view resizable. To be called before show_window()
-    fn make_resizable(&self) -> Status {
-	unsafe { Status::from(p::puglSetViewHint(self.view(), p::PuglViewHint_PUGL_RESIZABLE, true as i32)) }
+    /// Set the maximum size of the view.
+    ///
+    /// If an initial maximum size is known, this should be called
+    /// before `::realize()` and `::show_window()` to avoid stutter,
+    /// though it can be called afterwards as well.
+    fn set_max_size (&self, width: i32, height: i32) -> Status {
+        unsafe { Status::from(p::puglSetMaxSize(self.view(), width, height)) }
     }
 
-    /// set the window title
+    /// Set the view aspect ratio range.
+    ///
+    /// The x and y values here represent a ratio of width to height.  To set a
+    /// fixed aspect ratio, set the minimum and maximum values to the same ratio.
+
+    /// Note that setting different minimum and maximum constraints does not
+    /// currenty work on MacOS (the minimum is used), so only setting a fixed aspect
+    /// ratio works properly across all platforms.
+    ///
+    /// If an initial aspect ratio is known, this should be called
+    /// before `::realize()` and `::show_window()` to avoid stutter,
+    /// though it can be called afterwards as well
+    fn set_aspect_ratio(&self, min_x: i32, min_y: i32, max_x: i32, max_y: i32) -> Status {
+        unsafe { Status::from(p::puglSetAspectRatio(self.view(), min_x, min_y, max_x, max_y)) }
+    }
+
+    /// Make the view resizable.
+    ///
+    /// This should be called before `::show_window()` and `::realize()`.
+    fn make_resizable(&self) -> Status {
+        unsafe {
+            Status::from(p::puglSetViewHint(
+                self.view(),
+                p::PuglViewHint_PUGL_RESIZABLE, p::PuglViewHintValue_PUGL_TRUE))
+        }
+    }
+
+    /// Sets the window title
     fn set_window_title (&self, title: &str) -> Status {
         unsafe { Status::from(p::puglSetWindowTitle(self.view(), title.as_ptr() as *const i8)) }
     }
 
-    /// can be called to show the view
-    fn show_window (&self) -> Status {
+    /// Realize a view by creating a corresponding system view or window.
+    ///
+    /// After this call, the (initially invisible) underlying system
+    /// view exists and can be accessed with `::native_window()`.
+    /// There is currently no corresponding unrealize function, the
+    /// system view will be destroyed along with the view when
+    /// the `PuglView` is dropped.
+    ///
+    /// The view should be fully configured using the above functions before this is
+    /// called.  This function may only be called once per view.
+    fn realize(&self) -> Status {
+        unsafe { Status::from(p::puglRealize(self.view())) }
+    }
+
+    /// Show the view.
+    ///
+    /// If the view has not yet been realized, the first call to this
+    /// function will do so automatically.
+    ///
+    /// If the view is currently hidden, it will be shown and possibly
+    /// raised to the top depending on the platform.
+    fn show_window(&self) -> Status {
         unsafe { Status::from(p::puglShowWindow(self.view())) }
     }
 
-    /// Sets the mouse cursor
+    /// Hide the current window
+    fn hide_window(&self) -> Status {
+        unsafe { Status::from(p::puglHideWindow(self.view())) }
+    }
+
+    /// Return true iff the view is currently visible.
+    fn is_visible(&self) -> bool {
+        unsafe { p::puglGetVisible(self.view()) }
+    }
+
+    /// Set the mouse cursor.
+    ///
+    /// This changes the system cursor that is displayed when the
+    /// pointer is inside the view.  May fail if setting the cursor is
+    /// not supported on this system, for example if compiled on X11
+    /// without Xcursor support.
     fn set_cursor(&self, c: Cursor) -> Status {
         unsafe { Status::from(p::puglSetCursor(self.view(), c.into())) }
     }
 
     /// Update by processing events from the window system.
     ///
-    /// This function is a single iteration of the main loop, and should be called
-    /// repeatedly to update all views.
+    /// This function is a single iteration of the main loop, and
+    /// should be called repeatedly to update all views.
     ///
-    /// If `timeout` is zero, then this function will not block.  Plugins should
-    /// always use a timeout of zero to avoid blocking the host.
+    /// If `timeout` is zero, then this function will not block.
+    /// Plugins should always use a timeout of zero to avoid blocking
+    /// the host.
     ///
-    /// If a positive `timeout` is given, then events will be processed for that
-    /// amount of time, starting from when this function was called.
+    /// If a positive `timeout` is given, then events will be
+    /// processed for that amount of time, starting from when this
+    /// function was called.
     ///
-    /// If a negative `timeout` is given, this function will block indefinitely
-    /// until an event occurs.
+    /// If a negative `timeout` is given, this function will block
+    /// indefinitely until an event occurs.
     ///
-    /// For continuously animating programs, a timeout that is a reasonable fraction
-    /// of the ideal frame period should be used, to minimise input latency by
-    /// ensuring that as many input events are consumed as possible before drawing.
+    /// For continuously animating programs, a timeout that is a
+    /// reasonable fraction of the ideal frame period should be used,
+    /// to minimise input latency by ensuring that as many input
+    /// events are consumed as possible before drawing.
     ///
-    /// return #PUGL_SUCCESS if events are read, #PUGL_FAILURE if not, or an error.
-    ///
+    /// ## Returns
+    /// `Status::Success` if events are read,
+    /// `Status::Failure` if not, or an error.
     fn update (&self, timeout: f64) -> Status {
         unsafe { Status::from(p::puglUpdate(self.world(), timeout)) }
     }
 
+    /// Activate a repeating timer event.
+    ///
+    /// This starts a timer which will send a PuglEventTimer to view
+    /// every timeout seconds.  This can be used to perform some
+    /// action in a view at a regular interval with relatively low
+    /// frequency. Note that the frequency of timer events may be
+    /// limited by how often puglUpdate() is called.
+    ///
+    ///
+    /// If the given timer already exists, it is replaced.
+
+    /// ## Parameters
+    ///
+    /// * `id` – The identifier for this timer. This is an
+    ///    application-specific ID that should be a low number,
+    ///    typically the value of a constant or enum that starts from
+    ///    0. There is a platform-specific limit to the number of
+    ///    supported timers, and overhead associated with each, so
+    ///    applications should create only a few timers and perform
+    ///    several tasks in one if necessary.
+    ///
+    /// * `timeout` – The period, in seconds, of this timer. This is
+    ///   not guaranteed to have a resolution better than 10ms (the
+    ///   maximum timer resolution on Windows) and may be rounded up
+    ///   if it is too short. On X11 and MacOS, a resolution of about
+    ///   1ms can usually be relied on.
+    ///
+    /// ## Returns
+    /// `Status::Success` or `Status::Failure` if timers are not
+    /// supported on the system
     fn start_timer(&self, id: usize, timeout: f64) -> Status {
-	unsafe { Status::from(p::puglStartTimer(self.view(), id, timeout)) }
+        unsafe { Status::from(p::puglStartTimer(self.view(), id, timeout)) }
     }
 
+    /// Stop an active timer
+    ///
+    /// ## Parameters
+    /// * `id` – The ID previously passed to `::start_timer()`
+    ///
+    /// ## Returns
+    /// `Status::Success` or `Status::Failure` if no such timer was found.
     fn stop_timer(&self, id: usize) -> Status {
-	unsafe { Status::from(p::puglStopTimer(self.view(), id)) }
+        unsafe { Status::from(p::puglStopTimer(self.view(), id)) }
     }
-
-    fn timer_event(&mut self, _id: usize) -> Status { Status::Success }
 }
 
 /// A struct for a pugl "app" object
@@ -639,15 +813,15 @@ fn event_handler<T: PuglViewTrait> (view_ptr: *mut p::PuglView, event_ptr: *cons
         p::PuglEventType_PUGL_SCROLL => {
             Event { data: EventType::Scroll(Scroll::from (ev.scroll)), context: EventContext::from (ev.scroll) }
         },
-	p::PuglEventType_PUGL_FOCUS_IN => {
-	    return handle.focus_in() as p::PuglStatus
-	},
-	p::PuglEventType_PUGL_FOCUS_OUT => {
-	    return handle.focus_out() as p::PuglStatus
-	},
-	p::PuglEventType_PUGL_TIMER => {
-	    return handle.timer_event(ev.timer.id) as p::PuglStatus
-	}
+        p::PuglEventType_PUGL_FOCUS_IN => {
+            return handle.focus_in() as p::PuglStatus
+        },
+        p::PuglEventType_PUGL_FOCUS_OUT => {
+            return handle.focus_out() as p::PuglStatus
+        },
+        p::PuglEventType_PUGL_TIMER => {
+            return handle.timer_event(ev.timer.id) as p::PuglStatus
+        }
         p::PuglEventType_PUGL_CLOSE => {
             handle.close_request ();
             return p::PuglStatus_PUGL_SUCCESS
@@ -676,18 +850,17 @@ impl<T: PuglViewTrait> PuglView<T> {
             instance: unsafe {
                 p::puglNewView(p::puglNewWorld(p::PuglWorldType_PUGL_PROGRAM, 0))
             },
-	    ui_type: PhantomData
+            ui_type: PhantomData
         });
         handle.set_view(view.instance);
-	let handle = Box::into_raw(handle) as *const T;
+        let handle = Box::into_raw(handle) as *const T;
         unsafe {
-	    if !parent_window.is_null() {
-		println!("Parent window is {}", parent_window as usize);
-		p::puglSetParentWindow(view.instance, parent_window as usize);
-	    }
+            if !parent_window.is_null() {
+                p::puglSetParentWindow(view.instance, parent_window as usize);
+            }
             p::puglSetHandle(view.instance, handle as p::PuglHandle);
             p::puglSetEventFunc(view.instance, Some(event_handler::<T>));
-	    p::puglSetBackend(view.instance, p::puglCairoBackend());
+            p::puglSetBackend(view.instance, p::puglCairoBackend());
             p::puglSetViewHint(view.instance, p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT, true as i32);
         }
         view
@@ -695,29 +868,29 @@ impl<T: PuglViewTrait> PuglView<T> {
 
     /// returns a handle to the object T
     pub fn handle(&mut self) -> &mut T {
-	unsafe {
-	    &mut *(p::puglGetHandle(self.instance) as *mut T) as &mut T
-	}
+        unsafe {
+            &mut *(p::puglGetHandle(self.instance) as *mut T) as &mut T
+        }
     }
 
     /// returns a handle to the window system's view
     pub fn view(&self) -> PuglViewFFI {
-	self.instance
+        self.instance
     }
 
     /// retuns a handle to the native window
     pub fn native_window(&self) -> p::PuglNativeView {
-	unsafe { p::puglGetNativeWindow(self.view()) }
+        unsafe { p::puglGetNativeWindow(self.view()) }
     }
 }
 
 impl<T: PuglViewTrait> Drop for PuglView<T> {
     fn drop(&mut self) {
         unsafe {
-	    let instance = self.instance as *mut p::PuglView;
-	    let world = p::puglGetWorld(instance);
+            let instance = self.instance as *mut p::PuglView;
+            let world = p::puglGetWorld(instance);
             p::puglFreeView(instance);
-	    p::puglFreeWorld(world);
+            p::puglFreeWorld(world);
         };
     }
 }

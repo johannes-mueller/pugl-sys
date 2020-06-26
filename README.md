@@ -55,7 +55,4 @@ for very basic examples.
   quite easy, as only function call needs to be forwarded to `PuglView`. I
   usually implement features once I need them. PRs welcome.
 
-* Figure out how to distribute it via https://crates.io with all the build
-  dependencies (python, waf)
-
 * For sure a lot mode
