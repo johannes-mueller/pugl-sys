@@ -17,42 +17,71 @@ host would clash.
 
 ## Status
 
-Beta testing stage. Not all features of pugl are available yet. Currently
-only tested on Linux/X11. Rust hackers interested in programming small
-embeddable GUIs are encouraged to try it out.
+Beta testing stage. Not all features of pugl are available yet (see
+below). Currently only tested on Linux/X11. Rust hackers interested in
+programming small embeddable GUIs are encouraged to try it out.
+
+### API stability
+
+Before reaching the 1.0.0 release, incompatible API changes can happen. There
+is no large base of applications using `pugl-sys` as of yet. So experience with
+the API is limited. The 1.0.0 release will not happen before several developers
+have used `pugl-sys` for real life applications and given feedback.
+
+If it turns out that there is a better way to design the API it will be done.
+
+After 1.0.0 incompatible API changes will be rare. They will happen if `pugl`
+changes the API in an incompatible way which would not be sensible to hide
+behind some abstraction layer.
 
 
 ## How to use
 
-### Prerequisites
-
-You need to have the following stuff installed
-
-* python3 (to make waf, the build system of the pugl library run)
-* a C compiler and the usual libraries to compile X11 apps
-* clang as the `pugl` bindings are accessed through `bindgen`
-* developer files of cairo
-
-
-### Build
-
-* Clone this repo and `cd` into it.
-* Setup the `pugl` submodule by `git submodule update --init --recursive`
-* Run `cargo build`
+It's available at [crates.io](https://crates.io/crates/pugl-sys) so just add it
+as dependency in your `Cargo.toml`
 
 
 ### Usage
 
-This crate does not have any examples. There is the
-[pugl-ui](https://github.com/johannes-mueller/pugl-ui) crate that is a stub of
-a GUI toolkit implementing widget layout and event propagation. Check this out
-for very basic examples.
+This crate has only one minimal example in the docs. There is the
+[pugl-ui](https://crates.io/crates/pugl-ui) crate that is a stub of a GUI
+toolkit implementing widget layout and event propagation. Maybe you want to
+check this out.
 
 
 ## Todo
 
-* Make available the remaining features from pugl. Many of them are probably
-  quite easy, as only function call needs to be forwarded to `PuglView`. I
-  usually implement features once I need them. PRs welcome.
+Not all features of pugl are implemented.
 
-* For sure a lot mode
+* World as separately accessible entity
+
+	So far the World is only accessible via the View and only by unsafe FFI
+	functions. The only World function that is safely wrapped is `puglUpdate()`
+
+	To implement that it takes a mechanism to share references to the same World
+	across multiple views, that makes sure that the World is destroyed after the
+	last View is destroyed but not while at least one View still exists.
+
+
+* Support for manually sending events
+
+	This is basically wrapping the function `puglSendEvent()`. To implement it it
+	takes a conversion from `pugl::Event` to the `PuglEvent` FFI type.
+
+
+* Support for Clipboard
+
+	Probably easy for plain text. For other MIME data some other dependency would
+	be required.
+
+
+* Support for other backends than Cairo
+
+	  As of now, a view simply sets the Cairo backend and converts the handle
+      to a `cairo::Context` when an exposure event happens.
+
+* Some minor functions are not wrapped
+
+* `PuglViewHint` is not properly wrapped except for `PUGL_RESIZABLE`
+
+* Test (and make it work) on platforms other than Linux

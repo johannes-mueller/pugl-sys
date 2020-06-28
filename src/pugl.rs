@@ -1,6 +1,4 @@
-
 #![allow(dead_code)]
-#![allow(unused_macros)]
 
 use std::ops::{Add, AddAssign};
 use std::str;
@@ -23,6 +21,14 @@ pub struct Coord {
 }
 
 impl Coord {
+    /// Scales the `Coord` by a `scale_factor`
+    ///
+    /// ```
+    /// let c = pugl_sys::Coord { x: 1., y: 1. };
+    /// let scaled = c.scale(2.);
+    ///
+    /// assert!(scaled.x - 2. < f64::EPSILON);
+    /// assert!(scaled.y - 2. < f64::EPSILON);
     pub fn scale(&self, factor: f64) -> Coord {
         Coord {
             x: self.x * factor,
@@ -61,6 +67,14 @@ pub struct Size {
 }
 
 impl Size {
+    /// Scales the `Size` by a `scale_factor`
+    ///
+    /// ```
+    /// let s = pugl_sys::Size { w: 1., h: 1. };
+    /// let scaled = s.scale(2.);
+    ///
+    /// assert!(scaled.w - 2. < f64::EPSILON);
+    /// assert!(scaled.w - 2. < f64::EPSILON);
     pub fn scale(&self, factor: f64) -> Size {
         Size {
             w: self.w * factor,
@@ -87,7 +101,9 @@ impl Add for Size {
 /// uses coordinates where the top left corner is 0,0.
 #[derive(Copy, Clone, Default, Debug)]
 pub struct Rect {
+    /// The position of the upper left corner of the `Rect`
     pub pos: Coord,
+    /// The size of the `Rect`
     pub size: Size
 }
 
@@ -233,28 +249,44 @@ type Modifier = u32;
 /// Representing a key from the keyboard
 #[derive(Copy, Clone)]
 pub enum KeyVal {
-    /// character key
-    Character (char),
-    /// special key (non-character)
-    Special (SpecialKey)
+    /// A Character key
+    Character(char),
+    /// A special key (non-character)
+    Special(SpecialKey)
 }
 
 /// Key with keyboard modifiers
 #[derive(Copy, Clone)]
 pub struct Key {
-    /// actual key
+    /// The actual key
     pub key: KeyVal,
-    /// modifiers
+    /// The modifiers to be used with the [`Modifiers`](struct.Modifiers.html) struct
     pub modifiers: Modifier,
-    /// system's code for the key
+    /// System's code for the key
     pub code: KeyCode
 }
 
 impl Key {
-    /// Returns the character if the key is a character key, otherwise none
+    /// Returns the character if the key is a character key, otherwise `None`
+    ///
+    /// ```
+    /// let char_key = pugl_sys::Key {
+    ///     key: pugl_sys::KeyVal::Character('A'),
+    ///     modifiers: pugl_sys::Modifiers::SHIFT.bits(),
+    ///     code: 38
+    /// };
+    /// let special_key = pugl_sys::Key {
+    ///     key: pugl_sys::KeyVal::Special(pugl_sys::SpecialKey::F1),
+    ///     modifiers: pugl_sys::Modifiers::NONE.bits(),
+    ///     code: 67
+    /// };
+    ///
+    /// assert_eq!(char_key.try_char(), Some('A'));
+    /// assert_eq!(special_key.try_char(), None);
+    /// ```
     pub fn try_char(&self) -> Option<char> {
         match self.key {
-            KeyVal::Character (c) => Some (c),
+            KeyVal::Character(c) => Some(c),
             _ => None
         }
     }
@@ -295,6 +327,7 @@ pub struct MouseButton {
     /// The number of the mouse button
     pub num: u32,
     /// Keyboard modifiers, when the mouse button event happened
+    /// to be used with the [`Modifiers`](struct.Modifiers.html) struct.
     pub modifiers: Modifier
 }
 
@@ -308,7 +341,7 @@ impl From<p::PuglEventButton> for MouseButton {
 }
 
 impl From<p::PuglEventButton> for EventContext {
-        fn from(be: p::PuglEventButton) -> EventContext {
+    fn from(be: p::PuglEventButton) -> EventContext {
         EventContext {
             pos: Coord { x: be.x, y: be.y },
             pos_root: Coord { x: be.xRoot, y: be.yRoot },
@@ -320,7 +353,7 @@ impl From<p::PuglEventButton> for EventContext {
 /// Context of a pointer event
 #[derive(Copy, Clone)]
 pub struct MotionContext {
-    /// Keyboard modifiers
+    /// Keyboard modifiers to be used with the [`Modifiers`](struct.Modifiers.html) struct.
     pub modifiers: Modifier,
     /// True iff this event is a motion hint
     pub is_hint: bool,
@@ -413,12 +446,12 @@ impl From<p::PuglEventExpose> for ExposeArea {
 /// Event types
 #[derive(Copy, Clone)]
 pub enum EventType {
-    KeyPress (Key),
-    KeyRelease (Key),
-    MouseButtonPress (MouseButton),
-    MouseButtonRelease (MouseButton),
-    MouseMove (MotionContext),
-    Scroll (Scroll)
+    KeyPress(Key),
+    KeyRelease(Key),
+    MouseButtonPress(MouseButton),
+    MouseButtonRelease(MouseButton),
+    MouseMove(MotionContext),
+    Scroll(Scroll)
 }
 
 #[derive(Copy, Clone)]
@@ -428,7 +461,7 @@ pub struct Event {
 }
 
 impl Event {
-    /// Returns the key if the event is a KeyPress, otherwise None.
+    /// Returns the key if the event is a `KeyPress`, otherwise None.
     pub fn try_keypress(&self) -> Option<Key> {
         match self.data {
             EventType::KeyPress (k) => Some (k),
@@ -436,16 +469,22 @@ impl Event {
         }
     }
 
+    /// Returns the position where the mouse cursor was, when the event happened
+    /// relative to the top left corner of the View's window.
     pub fn pos(&self) -> Coord {
         self.context.pos
     }
 
+    /// Retuns the position where the mouse cursor was, when the event happened
+    /// relative to the top left corner of the View's window scaled by `scale_factor`.
     pub fn scale_pos(self, scale_factor: f64) -> Event {
         let mut ev = self;
         ev.context.pos = self.context.pos.scale(scale_factor);
         ev
     }
 
+    /// Retuns the position where the mouse cursor was, when the event happened
+    /// relative to the top left corner of the root window.
     pub fn pos_root(&self) -> Coord {
         self.context.pos_root
     }
@@ -480,7 +519,7 @@ impl From<Cursor> for p::PuglCursor {
 
 pub type PuglViewFFI = *mut p::PuglView;
 
-/// "Return status code.
+/// Return status code.
 #[repr(u32)]
 pub enum Status {
     /// Success
@@ -526,35 +565,73 @@ impl From<p::PuglStatus> for Status {
     }
 }
 
-/// A trait for an object of a pugl "app"
+/// The central trait for an object of a pugl "UI"
+///
+/// A UI implementation needs to have an object to manage the state of
+/// the UI as well as serving as an interface to the actual
+/// application. Such an object can implement the required methods of
+/// `PuglViewTrait`. The provided methods [`focus_in()`](#method.focus_in)
+/// and [`focus_out()`](#method.focus_out) can be implmentat optionally.
+/// All the other provided methods should not be reimplemented.
 pub trait PuglViewTrait {
 
-    /// Called if an event happened that is to be processed. Shall return a result status.
+    /// Called if an event happened that is to be processed.
+    ///
+    /// The data of the Event comes withe the argument `ev`.
+    ///
+    /// Shall return a result Status.
     fn event(&mut self, ev: Event) -> Status;
 
-    /// Called when a part of the view needs to be redrawn due to an exposure
-    /// The cairo::Context object `cr` reference can be used to draw on.
-    fn exposed (&mut self, _expose: &ExposeArea, cr: &cairo::Context);
+    /// Called when a part of the view needs to be redrawn due to an
+    /// exposure.
+    ///
+    /// The `cr` reference can be used to draw on.
+    ///
+    /// The `expose` argument provides information on the area that
+    /// needs to be redrawn.
+    fn exposed (&mut self, expose: &ExposeArea, cr: &cairo::Context);
 
     /// Called when the view has been resized
+    ///
+    /// The UI should relayout its contents to make it fit the size
+    /// provided by `size`.
     fn resize (&mut self, size: Size);
 
     /// Called when the view is requested to close by the window system
+    ///
+    /// The UI should exit the event loop before the next cycle after
+    /// this method has been called.
     fn close_request(&mut self);
 
     /// Called when the view recieves the focus
+    ///
+    /// Should be reimplemented if the application needs to react on
+    /// getting the focus.
+    ///
+    /// Shall return a result Status.
     fn focus_in(&mut self) -> Status { Status::Success }
 
     /// Called when the view gives the focus away
+    ///
+    /// Should be reimplemented if the application needs to react on
+    /// giving the focus away.
+    ///
+    /// Shall return a result Status.
     fn focus_out(&mut self) -> Status { Status::Success }
 
-    /// Called when a timer launched by `::set_timer()` finished.
+    /// Called when a timer launched by
+    /// [`start_timer()`](#method.start_timer) finished.
+    ///
+    /// Should be reimplemented if the application at some point calls
+    /// [`start_timer()`](#method.start_timer)
+    ///
+    /// Shall return a result Status.
     fn timer_event(&mut self, _id: usize) -> Status { Status::Success }
 
     /// Returns a handle to the window system's view
     fn view (&self) -> PuglViewFFI;
 
-    /// Returns a pointer to the PugleWorld
+    /// Returns a pointer to the `PugleWorld`
     fn world (&self) -> *mut p::PuglWorld {
         unsafe { p::puglGetWorld(self.view() as *mut p::PuglView) }
     }
@@ -573,9 +650,9 @@ pub trait PuglViewTrait {
 
     /// Request a redisplay of the given rectangle within the view.
     ///
-    /// This has the same semantics as puglPostRedisplay(), but allows
-    /// giving a precise region for redrawing only a portion of the
-    /// view.
+    /// This has the same semantics as [`post_redisplay()`](#method.post_redisplay),
+    /// but allows giving a precise region for redrawing only a
+    /// portion of the view.
     fn post_redisplay_rect(&self, pos: Coord, size: Size) -> Status {
         let p_rect = p::PuglRect {
             x: pos.x,
@@ -602,9 +679,10 @@ pub trait PuglViewTrait {
 
     /// Set the default size of the view.
     ///
-    /// This should be called before `::show_window()` and `::realize()` to
-    /// set the default size of the view, which will be the initial
-    /// size of the window if this is a top level view.
+    /// This should be called before [`show_window()`](#method.show_window) and
+    /// [`realize()`](#method.realize) to set the default size of
+    /// the view, which will be the initial size of the window if this
+    /// is a top level view.
     fn set_default_size(&self, width: i32, height: i32) -> Status {
         unsafe { Status::from(p::puglSetDefaultSize(self.view(), width, height)) }
     }
@@ -612,8 +690,8 @@ pub trait PuglViewTrait {
     /// Set the minimum size of the view.
     ///
     /// If an initial minimum size is known, this should be called
-    /// before `::realize()` and `::show_window()` to avoid stutter,
-    /// though it can be called afterwards as well.
+    /// before [`realize()`](#method.realize) and [`show_window()`](#method.show_window)
+    /// to avoid stutter, though it can be called afterwards as well.
     fn set_min_size (&self, width: i32, height: i32) -> Status {
         unsafe { Status::from(p::puglSetMinSize(self.view(), width, height)) }
     }
@@ -621,8 +699,8 @@ pub trait PuglViewTrait {
     /// Set the maximum size of the view.
     ///
     /// If an initial maximum size is known, this should be called
-    /// before `::realize()` and `::show_window()` to avoid stutter,
-    /// though it can be called afterwards as well.
+    /// before [`realize()`](#method.realize) and [`show_window()`](#method.show_window) to
+    /// avoid stutter, though it can be called afterwards as well.
     fn set_max_size (&self, width: i32, height: i32) -> Status {
         unsafe { Status::from(p::puglSetMaxSize(self.view(), width, height)) }
     }
@@ -637,7 +715,7 @@ pub trait PuglViewTrait {
     /// ratio works properly across all platforms.
     ///
     /// If an initial aspect ratio is known, this should be called
-    /// before `::realize()` and `::show_window()` to avoid stutter,
+    /// before [`realize()`](#method.realize) and [`show_window()`](#method.show_window) to avoid stutter,
     /// though it can be called afterwards as well
     fn set_aspect_ratio(&self, min_x: i32, min_y: i32, max_x: i32, max_y: i32) -> Status {
         unsafe { Status::from(p::puglSetAspectRatio(self.view(), min_x, min_y, max_x, max_y)) }
@@ -645,7 +723,7 @@ pub trait PuglViewTrait {
 
     /// Make the view resizable.
     ///
-    /// This should be called before `::show_window()` and `::realize()`.
+    /// This should be called before [[`show_window()`](#method.show_window)](#method.show_window) and [`realize()`](#method.realize).
     fn make_resizable(&self) -> Status {
         unsafe {
             Status::from(p::puglSetViewHint(
@@ -662,10 +740,11 @@ pub trait PuglViewTrait {
     /// Realize a view by creating a corresponding system view or window.
     ///
     /// After this call, the (initially invisible) underlying system
-    /// view exists and can be accessed with `::native_window()`.
+    /// view exists and can be accessed with
+    /// [`PuglView::native_window()`](struct.PuglView.html#method.native_window).
     /// There is currently no corresponding unrealize function, the
-    /// system view will be destroyed along with the view when
-    /// the `PuglView` is dropped.
+    /// system view will be destroyed along with the view when the
+    /// [`PuglView`](struct.PuglView.html) is dropped.
     ///
     /// The view should be fully configured using the above functions before this is
     /// called.  This function may only be called once per view.
@@ -769,19 +848,17 @@ pub trait PuglViewTrait {
     /// Stop an active timer
     ///
     /// ## Parameters
-    /// * `id` – The ID previously passed to `::start_timer()`
+    /// * `id` – The ID previously passed to [`start_timer()`](#method.start_timer)
     ///
     /// ## Returns
     /// `Status::Success` or `Status::Failure` if no such timer was found.
     fn stop_timer(&self, id: usize) -> Status {
         unsafe { Status::from(p::puglStopTimer(self.view(), id)) }
     }
-
-    fn new(view_ptr: *mut p::PuglView) -> Box<Self>;
 }
 
 /// A struct for a pugl "app" object
-/// T is struct implementing the PuglViewTrait, representing the app's logic
+/// T is struct implementing the PuglViewTrait, representing the UI's state
 pub struct PuglView<T: PuglViewTrait> {
     ui_type: std::marker::PhantomData<T>,
     instance: *mut p::PuglView
@@ -844,7 +921,13 @@ fn event_handler<T: PuglViewTrait> (view_ptr: *mut p::PuglView, event_ptr: *cons
 impl<T: PuglViewTrait> PuglView<T> {
     /// Sets up a new PuglView for a heap allocated object of T implementing PuglViewTrait
     ///
-    pub fn new(parent_window: *mut std::ffi::c_void) -> Box<Self> {
+    /// Can be called with a closure taking a [`PuglViewFFI`](type.PuglViewFFI.html)
+    /// returning an [`PuglViewTrait`](trait.PuglViewTrait) object.
+    ///
+    /// The trait object should retain the `PuglViewFFI` pointer to implement
+    /// [`PuglViewTrait:view()`](trait.PuglViewTrait.html#tymethod.view).
+    pub fn new<F>(parent_window: *mut std::ffi::c_void, new: F) -> Box<Self>
+    where F: FnOnce(PuglViewFFI) -> T {
         let view = Box::new(PuglView::<T> {
             instance: unsafe {
                 p::puglNewView(p::puglNewWorld(p::PuglWorldType_PUGL_PROGRAM, 0))
@@ -852,7 +935,7 @@ impl<T: PuglViewTrait> PuglView<T> {
             ui_type: PhantomData
         });
 
-        let ui =T::new(view.instance);
+        let ui = Box::new(new(view.instance));
         unsafe {
             if !parent_window.is_null() {
                 p::puglSetParentWindow(view.instance, parent_window as usize);
@@ -865,19 +948,19 @@ impl<T: PuglViewTrait> PuglView<T> {
         view
     }
 
-    /// returns a handle to the object T
+    /// Returns a handle to the object T
     pub fn handle(&mut self) -> &mut T {
         unsafe {
             &mut *(p::puglGetHandle(self.instance) as *mut T) as &mut T
         }
     }
 
-    /// returns a handle to the window system's view
+    /// Returns a handle to the window system's view
     pub fn view(&self) -> PuglViewFFI {
         self.instance
     }
 
-    /// retuns a handle to the native window
+    /// Retuns a handle to the native window
     pub fn native_window(&self) -> p::PuglNativeView {
         unsafe { p::puglGetNativeWindow(self.view()) }
     }
