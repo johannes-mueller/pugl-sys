@@ -105,7 +105,7 @@
 //!     }
 //! }
 //!
-//! fn main() {
+//! fn example() {
 //!     // Request a PuglView passing a closure that returns an initialized `UI`.
 //!     let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
 //!     // borrow the UI handle from the view and do some window initialization
@@ -120,6 +120,8 @@
 //!         ui.update(-1.0);
 //!     }
 //! }
+//!
+//! example();
 //! ```
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
