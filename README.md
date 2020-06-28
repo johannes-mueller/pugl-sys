@@ -77,8 +77,8 @@ Not all features of pugl are implemented.
 
 * Support for other backends than Cairo
 
-	  As of now, a view simply sets the Cairo backend and converts the handle
-      to a `cairo::Context` when an exposure event happens.
+    As of now, a view simply sets the Cairo backend and converts the handle
+    to a `cairo::Context` when an exposure event happens.
 
 * Some minor functions are not wrapped
 
