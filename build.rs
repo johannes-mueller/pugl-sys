@@ -47,5 +47,7 @@ fn main() {
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 
+    // FIXME: do this properly
     let _ = fs::remove_file("pugl/.lock-waf_linux_build");
+    let _ = fs::remove_file("pugl/.lock-waf_linux2_build");
 }
