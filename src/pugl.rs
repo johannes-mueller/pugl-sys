@@ -454,6 +454,7 @@ pub enum EventType {
     Scroll(Scroll)
 }
 
+/// An event signaled by the windowing system
 #[derive(Copy, Clone)]
 pub struct Event {
     pub data: EventType,
@@ -461,7 +462,7 @@ pub struct Event {
 }
 
 impl Event {
-    /// Returns the key if the event is a `KeyPress`, otherwise None.
+    /// Returns the key if the event is a `KeyPress`, otherwise `None`.
     pub fn try_keypress(&self) -> Option<Key> {
         match self.data {
             EventType::KeyPress (k) => Some (k),
@@ -569,17 +570,20 @@ impl From<p::PuglStatus> for Status {
 ///
 /// A UI implementation needs to have an object to manage the state of
 /// the UI as well as serving as an interface to the actual
-/// application. Such an object can implement the required methods of
-/// `PuglViewTrait`. The provided methods [`focus_in()`](#method.focus_in)
-/// and [`focus_out()`](#method.focus_out) can be implmentat optionally.
+/// application. Such an object must implement the required methods of
+/// `PuglViewTrait`. The provided methods
+/// [`focus_in()`](#method.focus_in) and
+/// [`focus_out()`](#method.focus_out) as wellas
+/// [`timer_event()`](#method.timer_event] can be implmentat
+/// optionally.
 /// All the other provided methods should not be reimplemented.
 pub trait PuglViewTrait {
 
     /// Called if an event happened that is to be processed.
     ///
-    /// The data of the Event comes withe the argument `ev`.
+    /// The data of the `Event` comes withe the argument `ev`.
     ///
-    /// Shall return a result Status.
+    /// Shall return a result `Status`.
     fn event(&mut self, ev: Event) -> Status;
 
     /// Called when a part of the view needs to be redrawn due to an
@@ -857,8 +861,9 @@ pub trait PuglViewTrait {
     }
 }
 
-/// A struct for a pugl "app" object
-/// T is struct implementing the PuglViewTrait, representing the UI's state
+/// A struct for a pugl UI object
+/// `T` is struct implementing the [`PuglViewTrait`](trait.PuglViewTrait.html),
+/// representing the UI's state
 pub struct PuglView<T: PuglViewTrait> {
     ui_type: std::marker::PhantomData<T>,
     instance: *mut p::PuglView
@@ -919,7 +924,8 @@ fn event_handler<T: PuglViewTrait> (view_ptr: *mut p::PuglView, event_ptr: *cons
 }
 
 impl<T: PuglViewTrait> PuglView<T> {
-    /// Sets up a new PuglView for a heap allocated object of T implementing PuglViewTrait
+    /// Sets up a new `PuglView` for a heap allocated object of `T` implementing
+    /// [`PuglViewTrait`](trait.PuglViewTrait.html).
     ///
     /// Can be called with a closure taking a [`PuglViewFFI`](type.PuglViewFFI.html)
     /// returning an [`PuglViewTrait`](trait.PuglViewTrait) object.
@@ -948,7 +954,7 @@ impl<T: PuglViewTrait> PuglView<T> {
         view
     }
 
-    /// Returns a handle to the object T
+    /// Returns a handle to the object `T`
     pub fn handle(&mut self) -> &mut T {
         unsafe {
             &mut *(p::puglGetHandle(self.instance) as *mut T) as &mut T
