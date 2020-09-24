@@ -350,23 +350,30 @@ impl From<p::PuglEventButton> for EventContext {
     }
 }
 
+type EventFlag = u32;
+
+bitflags! {
+    pub struct EventFlags: u32 {
+        const NONE = 0;
+        const IS_SEND_EVENT = 1;
+        const IS_HINT = 2;
+    }
+}
+
 /// Context of a pointer event
 #[derive(Copy, Clone)]
 pub struct MotionContext {
     /// Keyboard modifiers to be used with the [`Modifiers`](struct.Modifiers.html) struct.
     pub modifiers: Modifier,
-    /// True iff this event is a motion hint
-    pub is_hint: bool,
-    /// True iff this is the focus view
-    pub focus: bool
+    /// The event flags
+    pub flags: EventFlags
 }
 
 impl From<p::PuglEventMotion> for MotionContext {
     fn from (me: p::PuglEventMotion) -> MotionContext {
         MotionContext {
             modifiers: me.state,
-            is_hint: me.isHint,
-            focus: me.focus
+            flags: EventFlags::from_bits_truncate(me.flags)
         }
     }
 }
@@ -429,8 +436,6 @@ pub struct ExposeArea {
     pub pos: Coord,
     /// The size
     pub size: Size,
-    /// Number of expose events to follow
-    pub count: i32
 }
 
 impl From<p::PuglEventExpose> for ExposeArea {
@@ -438,7 +443,6 @@ impl From<p::PuglEventExpose> for ExposeArea {
         ExposeArea {
             pos: Coord { x: e.x, y: e.y },
             size: Size { w: e.width, h: e.height },
-            count: e.count
         }
     }
 }
@@ -1104,4 +1108,33 @@ mod test {
     fn from_pugl_key_to_special_key_no_special_key() {
         assert!(SpecialKey::from(42) == SpecialKey::None)
     }
+
+    #[test]
+    fn from_pugl_event_flags_default() {
+        let ef: EventFlag = 0;
+        assert!(!EventFlags::from_bits_truncate(ef).contains(EventFlags::IS_SEND_EVENT));
+        assert!(!EventFlags::from_bits_truncate(ef).contains(EventFlags::IS_HINT));
+    }
+
+    #[test]
+    fn from_pugl_event_flags_is_send_event() {
+        let send_event: EventFlag = p::PuglEventFlag_PUGL_IS_SEND_EVENT;
+        assert!(EventFlags::from_bits_truncate(send_event).contains(EventFlags::IS_SEND_EVENT));
+        assert!(!EventFlags::from_bits_truncate(send_event).contains(EventFlags::IS_HINT));
+    }
+
+    #[test]
+    fn from_pugl_event_flags_is_hint() {
+        let is_hint: EventFlag = p::PuglEventFlag_PUGL_IS_HINT;
+        assert!(!EventFlags::from_bits_truncate(is_hint).contains(EventFlags::IS_SEND_EVENT));
+        assert!(EventFlags::from_bits_truncate(is_hint).contains(EventFlags::IS_HINT));
+    }
+
+    #[test]
+    fn from_pugl_event_flags_is_both() {
+        let is_both: EventFlag = p::PuglEventFlag_PUGL_IS_HINT | p::PuglEventFlag_PUGL_IS_SEND_EVENT;
+        assert!(EventFlags::from_bits_truncate(is_both).contains(EventFlags::IS_SEND_EVENT));
+        assert!(EventFlags::from_bits_truncate(is_both).contains(EventFlags::IS_HINT));
+    }
+
 }
