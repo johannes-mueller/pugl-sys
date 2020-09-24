@@ -32,7 +32,7 @@
 //!
 //! # Example
 //!
-//! ```
+//! ```ignore
 //! use pugl_sys::*;
 //! use std::f64::consts::PI;
 //!
