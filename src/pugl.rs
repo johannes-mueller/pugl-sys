@@ -140,7 +140,7 @@ pub struct EventContext {
 }
 
 /// Keys not representing a character
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum SpecialKey {
     Backspace,
     Escape,
@@ -980,5 +980,128 @@ impl<T: PuglViewTrait> Drop for PuglView<T> {
             p::puglFreeView(instance);
             p::puglFreeWorld(world);
         };
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn add_coord() {
+        let c = Coord { x: 2., y: 3. };
+        let a = Coord { x: 3., y: 4. };
+
+        let s = c + a;
+        assert_eq!(s.x, 5.);
+        assert_eq!(s.y, 7.);
+    }
+
+    #[test]
+    fn add_assign_coord() {
+        let mut c = Coord { x: 2., y: 3. };
+        let a = Coord { x: 3., y: 4. };
+
+        c += a;
+        assert_eq!(c.x, 5.);
+        assert_eq!(c.y, 7.);
+    }
+
+    #[test]
+    fn add_size() {
+        let c = Size { w: 2., h: 3. };
+        let a = Size { w: 3., h: 4. };
+
+        let s = c + a;
+        assert_eq!(s.w, 5.);
+        assert_eq!(s.h, 7.);
+    }
+
+    #[test]
+    fn from_pugl_rect_to_rect() {
+        let pr = p::PuglRect {
+            x: 2.,
+            y: 3.,
+            width: 4.,
+            height: 5.,
+        };
+
+        let r = Rect::from(pr);
+        assert_eq!(r.pos.x, 2.);
+        assert_eq!(r.pos.y, 3.);
+        assert_eq!(r.size.w, 4.);
+        assert_eq!(r.size.h, 5.);
+    }
+
+    #[test]
+    fn from_rect_to_pugl_rect() {
+        let r = Rect {
+            pos: Coord { x: 2., y: 3. },
+            size: Size { w: 4., h: 5. }
+        };
+
+        let pr = p::PuglRect::from(r);
+        assert_eq!(pr.x,  2.);
+        assert_eq!(pr.y,  3.);
+        assert_eq!(pr.width, 4.);
+        assert_eq!(pr.height, 5.);
+    }
+
+
+    fn key_tuples() -> Vec<(p::PuglKey, SpecialKey)> {
+        vec![
+            (p::PuglKey_PUGL_KEY_BACKSPACE, SpecialKey::Backspace),
+            (p::PuglKey_PUGL_KEY_ESCAPE, SpecialKey::Escape),
+            (p::PuglKey_PUGL_KEY_DELETE, SpecialKey::Delete),
+            (p::PuglKey_PUGL_KEY_F1, SpecialKey::F1),
+            (p::PuglKey_PUGL_KEY_F2, SpecialKey::F2),
+            (p::PuglKey_PUGL_KEY_F3, SpecialKey::F3),
+            (p::PuglKey_PUGL_KEY_F4, SpecialKey::F4),
+            (p::PuglKey_PUGL_KEY_F5, SpecialKey::F5),
+            (p::PuglKey_PUGL_KEY_F6, SpecialKey::F6),
+            (p::PuglKey_PUGL_KEY_F7, SpecialKey::F7),
+            (p::PuglKey_PUGL_KEY_F8, SpecialKey::F8),
+            (p::PuglKey_PUGL_KEY_F9, SpecialKey::F9),
+            (p::PuglKey_PUGL_KEY_F10, SpecialKey::F10),
+            (p::PuglKey_PUGL_KEY_F11, SpecialKey::F11),
+            (p::PuglKey_PUGL_KEY_F12, SpecialKey::F12),
+            (p::PuglKey_PUGL_KEY_LEFT, SpecialKey::Left),
+            (p::PuglKey_PUGL_KEY_UP, SpecialKey::Up),
+            (p::PuglKey_PUGL_KEY_RIGHT, SpecialKey::Right),
+            (p::PuglKey_PUGL_KEY_DOWN, SpecialKey::Down),
+            (p::PuglKey_PUGL_KEY_PAGE_UP, SpecialKey::PageUp),
+            (p::PuglKey_PUGL_KEY_PAGE_DOWN, SpecialKey::PageDown),
+            (p::PuglKey_PUGL_KEY_HOME, SpecialKey::Home),
+            (p::PuglKey_PUGL_KEY_END, SpecialKey::End),
+            (p::PuglKey_PUGL_KEY_INSERT, SpecialKey::Insert),
+            (p::PuglKey_PUGL_KEY_SHIFT_L, SpecialKey::ShiftL),
+            (p::PuglKey_PUGL_KEY_SHIFT_R, SpecialKey::ShiftR),
+            (p::PuglKey_PUGL_KEY_CTRL_L, SpecialKey::CtrlL),
+            (p::PuglKey_PUGL_KEY_ALT_L, SpecialKey::AltL),
+            (p::PuglKey_PUGL_KEY_CTRL_R, SpecialKey::CtrlR),
+            (p::PuglKey_PUGL_KEY_ALT_R, SpecialKey::AltR),
+            (p::PuglKey_PUGL_KEY_SUPER_L, SpecialKey::SuperL),
+            (p::PuglKey_PUGL_KEY_SUPER_R, SpecialKey::SuperR),
+            (p::PuglKey_PUGL_KEY_MENU, SpecialKey::KeyMenu),
+            (p::PuglKey_PUGL_KEY_CAPS_LOCK, SpecialKey::KeyCapsLock),
+            (p::PuglKey_PUGL_KEY_SCROLL_LOCK, SpecialKey::KeyScrollLock),
+            (p::PuglKey_PUGL_KEY_NUM_LOCK, SpecialKey::KeyNumLock),
+            (p::PuglKey_PUGL_KEY_PRINT_SCREEN, SpecialKey::KeyPrintScreen),
+            (p::PuglKey_PUGL_KEY_PAUSE, SpecialKey::KeyPause)
+        ]
+    }
+
+    #[test]
+    fn from_pugl_key_to_special_key() {
+        let kt = key_tuples();
+        for (pk, sk) in kt {
+            assert!(SpecialKey::from(pk) == sk)
+        }
+    }
+
+    #[test]
+    fn from_pugl_key_to_special_key_no_special_key() {
+        assert!(SpecialKey::from(42) == SpecialKey::None)
     }
 }
