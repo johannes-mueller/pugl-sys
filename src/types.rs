@@ -435,7 +435,7 @@ impl From<p::PuglEventConfigure> for Size {
 }
 
 /// The area that needs to be redrawn due to an expose event
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct ExposeArea {
     /// The view relative coordinate
     pub pos: Coord,
@@ -650,6 +650,80 @@ mod test {
         assert_eq!(pr.height, 5.);
     }
 
+    fn pugl_event_key_press_small_a() -> p::PuglEventKey {
+        p::PuglEventKey {
+            type_: p::PuglEventType_PUGL_KEY_PRESS,
+            flags: 0,
+            time: 2.0,
+            x: 23.0,
+            y: 42.0,
+            xRoot: 123.0,
+            yRoot: 142.0,
+            state: 0,
+            keycode: 38,
+            key: 0x61, // 'a'
+        }
+    }
+
+    fn pugl_event_key_release_capital_a() -> p::PuglEventKey {
+        p::PuglEventKey {
+            type_: p::PuglEventType_PUGL_KEY_PRESS,
+            flags: 0,
+            time: 2.0,
+            x: 23.0,
+            y: 42.0,
+            xRoot: 123.0,
+            yRoot: 142.0,
+            state: p::PuglMod_PUGL_MOD_SHIFT,
+            keycode: 38,
+            key: 0x41, // 'A'
+        }
+    }
+
+    fn pugl_event_key_press_f1() -> p::PuglEventKey {
+        p::PuglEventKey {
+            type_: p::PuglEventType_PUGL_KEY_PRESS,
+            flags: 0,
+            time: 2.0,
+            x: 23.0,
+            y: 42.0,
+            xRoot: 123.0,
+            yRoot: 142.0,
+            state: p::PuglMod_PUGL_MOD_CTRL | p::PuglMod_PUGL_MOD_ALT,
+            keycode: p::PuglKey_PUGL_KEY_F1,
+            key: 0, // 'A'
+        }
+    }
+
+    #[test]
+    fn from_pugl_key_to_keyval() {
+        let kv = KeyVal::from(pugl_event_key_press_small_a());
+        assert_eq!(kv, KeyVal::Character('a'));
+        let kv = KeyVal::from(pugl_event_key_release_capital_a());
+        assert_eq!(kv, KeyVal::Character('A'));
+        let kv = KeyVal::from(pugl_event_key_press_f1());
+        assert_eq!(kv, KeyVal::Special(SpecialKey::F1));
+    }
+
+    #[test]
+    fn from_pugl_key_to_key() {
+        let key = Key::from(pugl_event_key_press_small_a());
+        assert_eq!(key.modifiers, 0);
+        let key = Key::from(pugl_event_key_release_capital_a());
+        assert_eq!(key.modifiers, 1);
+        let key = Key::from(pugl_event_key_press_f1());
+        assert_eq!(key.modifiers, 6);
+    }
+
+    #[test]
+    fn from_pugl_key_to_eventcontext() {
+        let ec = EventContext::from(pugl_event_key_press_small_a());
+        assert_eq!(ec.pos.x, 23.0);
+        assert_eq!(ec.pos.y, 42.0);
+        assert_eq!(ec.pos_root.x, 123.0);
+        assert_eq!(ec.pos_root.y, 142.0);
+        assert_eq!(ec.time, 2.0);
+    }
 
     fn key_tuples() -> Vec<(p::PuglKey, SpecialKey)> {
         vec![
@@ -703,6 +777,11 @@ mod test {
     }
 
     #[test]
+    fn from_special_key_to_special_key_no_special_key() {
+        assert!(SpecialKey::from(42) == SpecialKey::None)
+    }
+
+    #[test]
     fn from_pugl_crossing_to_event_context() {
         let pev_crossing = p::PuglEventCrossing {
             type_: p::PuglEventType_PUGL_POINTER_IN,
@@ -723,9 +802,113 @@ mod test {
         assert_eq!(ec.time, 2.0);
     }
 
+    fn pugl_mouse_button() ->  p::PuglEventButton {
+        p::PuglEventButton {
+            type_: p::PuglEventType_PUGL_BUTTON_PRESS,
+            flags: 0,
+            time: 2.0,
+            x: 23.0,
+            y: 42.0,
+            xRoot: 123.0,
+            yRoot: 142.0,
+            state: 2,
+            button: 1
+        }
+    }
+
     #[test]
-    fn from_pugl_key_to_special_key_no_special_key() {
-        assert!(SpecialKey::from(42) == SpecialKey::None)
+    fn from_pugl_button_to_mouse_button() {
+        let mb = MouseButton::from(pugl_mouse_button());
+        assert_eq!(mb.modifiers, 2);
+        assert_eq!(mb.num, 1);
+    }
+
+    #[test]
+    fn from_pugl_button_to_event_context() {
+        let ec = EventContext::from(pugl_mouse_button());
+        assert_eq!(ec.pos.x, 23.0);
+        assert_eq!(ec.pos.y, 42.0);
+        assert_eq!(ec.pos_root.x, 123.0);
+        assert_eq!(ec.pos_root.y, 142.0);
+        assert_eq!(ec.time, 2.0);
+    }
+
+    fn pugl_event_motion() -> p::PuglEventMotion {
+        p::PuglEventMotion {
+            type_: p::PuglEventType_PUGL_MOTION,
+            flags: 0,
+            time: 2.0,
+            x: 23.0,
+            y: 42.0,
+            xRoot: 123.0,
+            yRoot: 142.0,
+            state: 2,
+        }
+    }
+
+    #[test]
+    fn from_pugl_motion_to_motion_context() {
+        let mc = MotionContext::from(pugl_event_motion());
+        assert_eq!(mc, MotionContext { modifiers: 2, flags: EventFlags::NONE });
+    }
+
+    #[test]
+    fn from_pugl_motion_to_event_context() {
+        let ec = EventContext::from(pugl_event_motion());
+        assert_eq!(ec.pos.x, 23.0);
+        assert_eq!(ec.pos.y, 42.0);
+        assert_eq!(ec.pos_root.x, 123.0);
+        assert_eq!(ec.pos_root.y, 142.0);
+        assert_eq!(ec.time, 2.0);
+    }
+
+    fn pugl_scroll_event() -> p::PuglEventScroll {
+        p::PuglEventScroll {
+            type_: p::PuglEventType_PUGL_SCROLL,
+            flags: 0,
+            time: 2.0,
+            x: 23.0,
+            y: 42.0,
+            xRoot: 123.0,
+            yRoot: 142.0,
+            state: 2,
+            dx: 3.14,
+            dy: 2.71,
+            direction: 0
+        }
+    }
+
+    #[test]
+    fn from_pugl_scroll_to_scroll() {
+        let sc = Scroll::from(pugl_scroll_event());
+        assert_eq!(sc, Scroll { dx: 3.14, dy: 2.71, modifiers: 2 });
+    }
+
+    #[test]
+    fn from_pugl_scroll_to_event_context() {
+        let ec = EventContext::from(pugl_scroll_event());
+        assert_eq!(ec.pos.x, 23.0);
+        assert_eq!(ec.pos.y, 42.0);
+        assert_eq!(ec.pos_root.x, 123.0);
+        assert_eq!(ec.pos_root.y, 142.0);
+        assert_eq!(ec.time, 2.0);
+    }
+
+    fn pugl_event_expose() -> p::PuglEventExpose {
+        p::PuglEventExpose {
+            type_: p::PuglEventType_PUGL_EXPOSE,
+            flags: 0,
+            x: 23.0,
+            y: 42.0,
+            width: 12.0,
+            height: 6.0
+        }
+    }
+
+    #[test]
+    fn from_pugl_expose_to_expose_area() {
+        let ea = ExposeArea::from(pugl_event_expose());
+        assert_eq!(ea, ExposeArea { pos: Coord { x: 23., y: 42. }, size: Size { w: 12.0, h: 6. }});
     }
 
     #[test]
