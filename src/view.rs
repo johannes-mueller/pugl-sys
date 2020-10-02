@@ -310,28 +310,34 @@ pub struct PuglView<T: PuglViewTrait> {
 
 
 unsafe extern "C"
-fn event_handler<T: PuglViewTrait> (view_ptr: *mut p::PuglView, event_ptr: *const p::PuglEvent) -> p::PuglStatus {
+fn event_handler<T: PuglViewTrait>(view_ptr: *mut p::PuglView, event_ptr: *const p::PuglEvent) -> p::PuglStatus {
     let ev = *event_ptr;
     let handle: &mut T = &mut *(p::puglGetHandle(view_ptr) as *mut T);
     //eprintln!("event_handler: {:?}", ev.type_);
     let event = match ev.type_ {
         p::PuglEventType_PUGL_KEY_PRESS => {
-            Event { data: EventType::KeyPress(Key::from (ev.key)), context: EventContext::from (ev.key) }
+            Event { data: EventType::KeyPress(Key::from(ev.key)), context: EventContext::from(ev.key) }
         },
         p::PuglEventType_PUGL_KEY_RELEASE => {
-            Event { data: EventType::KeyRelease(Key::from (ev.key)), context: EventContext::from (ev.key) }
+            Event { data: EventType::KeyRelease(Key::from(ev.key)), context: EventContext::from(ev.key) }
         },
         p::PuglEventType_PUGL_BUTTON_PRESS => {
-            Event { data: EventType::MouseButtonPress(MouseButton::from (ev.button)), context: EventContext::from (ev.button) }
+            Event { data: EventType::MouseButtonPress(MouseButton::from(ev.button)), context: EventContext::from(ev.button) }
         },
         p::PuglEventType_PUGL_BUTTON_RELEASE => {
-            Event { data: EventType::MouseButtonRelease(MouseButton::from (ev.button)), context: EventContext::from (ev.button) }
+            Event { data: EventType::MouseButtonRelease(MouseButton::from(ev.button)), context: EventContext::from(ev.button) }
         },
         p::PuglEventType_PUGL_MOTION_NOTIFY => {
-            Event { data: EventType::MouseMove(MotionContext::from (ev.motion)), context: EventContext::from (ev.motion) }
+            Event { data: EventType::MouseMove(MotionContext::from(ev.motion)), context: EventContext::from(ev.motion) }
         },
+        p::PuglEventType_PUGL_POINTER_IN => {
+            Event { data: EventType::PointerIn, context: EventContext::from(ev.crossing) }
+        }
+        p::PuglEventType_PUGL_POINTER_OUT => {
+            Event { data: EventType::PointerOut, context: EventContext::from(ev.crossing) }
+        }
         p::PuglEventType_PUGL_SCROLL => {
-            Event { data: EventType::Scroll(Scroll::from (ev.scroll)), context: EventContext::from (ev.scroll) }
+            Event { data: EventType::Scroll(Scroll::from(ev.scroll)), context: EventContext::from(ev.scroll) }
         },
         p::PuglEventType_PUGL_FOCUS_IN => {
             return handle.focus_in() as p::PuglStatus
@@ -348,11 +354,11 @@ fn event_handler<T: PuglViewTrait> (view_ptr: *mut p::PuglView, event_ptr: *cons
         }
         p::PuglEventType_PUGL_EXPOSE => {
             let cr = cairo::Context::from_raw_borrow (p::puglGetContext(view_ptr) as *mut cairo_sys::cairo_t);
-            handle.exposed (&ExposeArea::from (ev.expose), &cr);
+            handle.exposed (&ExposeArea::from(ev.expose), &cr);
             return p::PuglStatus_PUGL_SUCCESS
         },
         p::PuglEventType_PUGL_CONFIGURE => {
-            let size = Size::from (ev.configure);
+            let size = Size::from(ev.configure);
             handle.resize (size);
             return p::PuglStatus_PUGL_SUCCESS
         },

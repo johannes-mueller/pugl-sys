@@ -343,7 +343,8 @@ mod test {
     struct UI {
         view: PuglViewFFI,
 
-        click_state: ClickState
+        click_state: ClickState,
+        pointer_entered: bool,
     }
 
 
@@ -351,7 +352,8 @@ mod test {
         fn new(view: PuglViewFFI) -> Self {
             Self {
                 view,
-                click_state: ClickState::None
+                click_state: ClickState::None,
+                pointer_entered: false
             }
         }
     }
@@ -363,6 +365,8 @@ mod test {
             match ev.data {
                 EventType::MouseButtonPress(_) => self.click_state = ClickState::Clicked,
                 EventType::MouseButtonRelease(_) => self.click_state = ClickState::Released,
+                EventType::PointerIn => self.pointer_entered = true,
+                EventType::PointerOut => self.pointer_entered = false,
                 _ => {}
             }
 
@@ -462,6 +466,20 @@ mod test {
         assert_eq!(ui.click_state, ClickState::Clicked);
         ui.update(-1.0);
         assert_eq!(ui.click_state, ClickState::Released);
+    }
+
+    #[test]
+    fn test_pointer_enter_leave_event() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        view.queue_event(Event { data: EventType::PointerIn, context: EventContext::default() });
+        view.queue_event(Event { data: EventType::PointerOut, context: EventContext::default() });
+
+        let ui = view.handle();
+        assert!(!ui.pointer_entered);
+        ui.update(-1.0);
+        assert!(ui.pointer_entered);
+        ui.update(-1.0);
+        assert!(!ui.pointer_entered);
     }
 
     #[test]

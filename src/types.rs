@@ -418,6 +418,16 @@ impl From<p::PuglEventScroll> for EventContext {
     }
 }
 
+impl From<p::PuglEventCrossing> for EventContext {
+    fn from(pce: p::PuglEventCrossing) -> EventContext {
+        EventContext {
+            pos: Coord { x: pce.x, y: pce.y },
+            pos_root: Coord { x: pce.xRoot, y: pce.yRoot },
+            time: pce.time
+        }
+    }
+}
+
 impl From<p::PuglEventConfigure> for Size {
     fn from (ce: p::PuglEventConfigure) -> Size {
         Size { w: ce.width, h: ce.height }
@@ -450,6 +460,8 @@ pub enum EventType {
     MouseButtonPress(MouseButton),
     MouseButtonRelease(MouseButton),
     MouseMove(MotionContext),
+    PointerIn,
+    PointerOut,
     Scroll(Scroll)
 }
 
@@ -688,6 +700,27 @@ mod test {
         for (pk, sk) in kt {
             assert!(SpecialKey::from(pk) == sk)
         }
+    }
+
+    #[test]
+    fn from_pugl_crossing_to_event_context() {
+        let pev_crossing = p::PuglEventCrossing {
+            type_: p::PuglEventType_PUGL_POINTER_IN,
+            flags: 0,
+            time: 2.0,
+            x: 23.0,
+            y: 42.0,
+            xRoot: 123.0,
+            yRoot: 142.0,
+            state: 0,
+            mode: 0
+        };
+        let ec = EventContext::from(pev_crossing);
+        assert_eq!(ec.pos.x, 23.0);
+        assert_eq!(ec.pos.y, 42.0);
+        assert_eq!(ec.pos_root.x, 123.0);
+        assert_eq!(ec.pos_root.y, 142.0);
+        assert_eq!(ec.time, 2.0);
     }
 
     #[test]
