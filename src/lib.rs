@@ -32,7 +32,7 @@
 //!
 //! # Example
 //!
-//! ```ignore
+//! ```
 //! use pugl_sys::*;
 //! use std::f64::consts::PI;
 //!
@@ -133,9 +133,31 @@ extern crate cairo_sys;
 #[macro_use]
 extern crate bitflags;
 
+#[doc(hidden)]
+pub(crate) mod pugl;
+
 #[macro_use]
 #[doc(hidden)]
-pub mod pugl;
+pub mod types;
+
+pub use types::*;
+
+#[doc(hidden)]
+pub use types::*;
+
+#[doc(hidden)]
+#[cfg(not(feature= "testing"))]
+pub mod view;
 
 #[doc(inline)]
-pub use pugl::*;
+#[cfg(not(feature= "testing"))]
+pub use view::*;
+
+
+#[doc(hidden)]
+#[cfg(feature= "testing")]
+pub mod view_test;
+
+#[doc(inline)]
+#[cfg(feature= "testing")]
+pub use view_test::*;
