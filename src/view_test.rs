@@ -449,11 +449,11 @@ mod test {
             time: 0.0
         };
         let press_event = Event {
-            data: EventType::MouseButtonPress(MouseButton { num: 0, modifiers: 0 }),
+            data: EventType::MouseButtonPress(MouseButton { num: 0, modifiers: Modifiers::default() }),
             context: event_context
         };
         let release_event = Event {
-            data: EventType::MouseButtonRelease(MouseButton { num: 0, modifiers: 0 }),
+            data: EventType::MouseButtonRelease(MouseButton { num: 0, modifiers: Modifiers::default() }),
             context: event_context
         };
 

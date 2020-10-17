@@ -225,6 +225,7 @@ impl From<p::PuglKey> for SpecialKey {
 
 bitflags! {
     /// Keyboard modifiers
+    #[derive(Default)]
     pub struct Modifiers: u32 {
         const NONE  = 0;
         const SHIFT = 1;
@@ -236,9 +237,6 @@ bitflags! {
 
 /// System's key code
 type KeyCode = u32;
-
-/// Bitflag of Keyboard modifiers
-type Modifier = u32;
 
 /// Representing a key from the keyboard
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -255,7 +253,7 @@ pub struct Key {
     /// The actual key
     pub key: KeyVal,
     /// The modifiers to be used with the [`Modifiers`](struct.Modifiers.html) struct
-    pub modifiers: Modifier,
+    pub modifiers: Modifiers,
     /// System's code for the key
     pub code: KeyCode
 }
@@ -266,12 +264,12 @@ impl Key {
     /// ```
     /// let char_key = pugl_sys::Key {
     ///     key: pugl_sys::KeyVal::Character('A'),
-    ///     modifiers: pugl_sys::Modifiers::SHIFT.bits(),
+    ///     modifiers: pugl_sys::Modifiers::SHIFT,
     ///     code: 38
     /// };
     /// let special_key = pugl_sys::Key {
     ///     key: pugl_sys::KeyVal::Special(pugl_sys::SpecialKey::F1),
-    ///     modifiers: pugl_sys::Modifiers::NONE.bits(),
+    ///     modifiers: pugl_sys::Modifiers::NONE,
     ///     code: 67
     /// };
     ///
@@ -300,7 +298,7 @@ impl From<p::PuglEventKey> for Key {
         Key {
             key: KeyVal::from (ke),
             code: ke.keycode,
-            modifiers: ke.state
+            modifiers: Modifiers::from_bits_truncate(ke.state)
         }
     }
 }
@@ -322,14 +320,14 @@ pub struct MouseButton {
     pub num: u32,
     /// Keyboard modifiers, when the mouse button event happened
     /// to be used with the [`Modifiers`](struct.Modifiers.html) struct.
-    pub modifiers: Modifier
+    pub modifiers: Modifiers
 }
 
 impl From<p::PuglEventButton> for MouseButton {
     fn from(be: p::PuglEventButton) -> MouseButton {
         MouseButton {
             num: be.button,
-            modifiers: be.state
+            modifiers: Modifiers::from_bits_truncate(be.state)
         }
     }
 }
@@ -344,8 +342,6 @@ impl From<p::PuglEventButton> for EventContext {
     }
 }
 
-type EventFlag = u32;
-
 bitflags! {
     #[derive(Default)]
     pub struct EventFlags: u32 {
@@ -359,7 +355,7 @@ bitflags! {
 #[derive(Copy, Clone, Default, PartialEq, Debug)]
 pub struct MotionContext {
     /// Keyboard modifiers to be used with the [`Modifiers`](struct.Modifiers.html) struct.
-    pub modifiers: Modifier,
+    pub modifiers: Modifiers,
     /// The event flags
     pub flags: EventFlags
 }
@@ -367,7 +363,7 @@ pub struct MotionContext {
 impl From<p::PuglEventMotion> for MotionContext {
     fn from (me: p::PuglEventMotion) -> MotionContext {
         MotionContext {
-            modifiers: me.state,
+            modifiers: Modifiers::from_bits_truncate(me.state),
             flags: EventFlags::from_bits_truncate(me.flags)
         }
     }
@@ -396,14 +392,14 @@ pub struct Scroll {
     pub dx: f64,
     /// vertical scroll distance
     pub dy: f64,
-    pub modifiers: Modifier
+    pub modifiers: Modifiers
 }
 
 impl From<p::PuglEventScroll> for Scroll {
     fn from (se: p::PuglEventScroll) -> Scroll {
         Scroll {
             dx: se.dx, dy: se.dy,
-            modifiers: se.state
+            modifiers: Modifiers::from_bits_truncate(se.state)
         }
     }
 }
@@ -708,11 +704,11 @@ mod test {
     #[test]
     fn from_pugl_key_to_key() {
         let key = Key::from(pugl_event_key_press_small_a());
-        assert_eq!(key.modifiers, 0);
+        assert_eq!(key.modifiers, Modifiers::from_bits_truncate(0));
         let key = Key::from(pugl_event_key_release_capital_a());
-        assert_eq!(key.modifiers, 1);
+        assert_eq!(key.modifiers, Modifiers::from_bits_truncate(1));
         let key = Key::from(pugl_event_key_press_f1());
-        assert_eq!(key.modifiers, 6);
+        assert_eq!(key.modifiers, Modifiers::from_bits_truncate(6));
     }
 
     #[test]
@@ -819,7 +815,7 @@ mod test {
     #[test]
     fn from_pugl_button_to_mouse_button() {
         let mb = MouseButton::from(pugl_mouse_button());
-        assert_eq!(mb.modifiers, 2);
+        assert_eq!(mb.modifiers.bits, 2);
         assert_eq!(mb.num, 1);
     }
 
@@ -849,7 +845,7 @@ mod test {
     #[test]
     fn from_pugl_motion_to_motion_context() {
         let mc = MotionContext::from(pugl_event_motion());
-        assert_eq!(mc, MotionContext { modifiers: 2, flags: EventFlags::NONE });
+        assert_eq!(mc, MotionContext { modifiers: Modifiers::from_bits_truncate(2), flags: EventFlags::NONE });
     }
 
     #[test]
@@ -881,7 +877,11 @@ mod test {
     #[test]
     fn from_pugl_scroll_to_scroll() {
         let sc = Scroll::from(pugl_scroll_event());
-        assert_eq!(sc, Scroll { dx: 3.14, dy: 2.71, modifiers: 2 });
+        assert_eq!(sc, Scroll {
+            dx: 3.14,
+            dy: 2.71,
+            modifiers: Modifiers::from_bits_truncate(2)
+        });
     }
 
     #[test]
@@ -913,28 +913,28 @@ mod test {
 
     #[test]
     fn from_pugl_event_flags_default() {
-        let ef: EventFlag = 0;
+        let ef = 0;
         assert!(!EventFlags::from_bits_truncate(ef).contains(EventFlags::IS_SEND_EVENT));
         assert!(!EventFlags::from_bits_truncate(ef).contains(EventFlags::IS_HINT));
     }
 
     #[test]
     fn from_pugl_event_flags_is_send_event() {
-        let send_event: EventFlag = p::PuglEventFlag_PUGL_IS_SEND_EVENT;
+        let send_event = p::PuglEventFlag_PUGL_IS_SEND_EVENT;
         assert!(EventFlags::from_bits_truncate(send_event).contains(EventFlags::IS_SEND_EVENT));
         assert!(!EventFlags::from_bits_truncate(send_event).contains(EventFlags::IS_HINT));
     }
 
     #[test]
     fn from_pugl_event_flags_is_hint() {
-        let is_hint: EventFlag = p::PuglEventFlag_PUGL_IS_HINT;
+        let is_hint = p::PuglEventFlag_PUGL_IS_HINT;
         assert!(!EventFlags::from_bits_truncate(is_hint).contains(EventFlags::IS_SEND_EVENT));
         assert!(EventFlags::from_bits_truncate(is_hint).contains(EventFlags::IS_HINT));
     }
 
     #[test]
     fn from_pugl_event_flags_is_both() {
-        let is_both: EventFlag = p::PuglEventFlag_PUGL_IS_HINT | p::PuglEventFlag_PUGL_IS_SEND_EVENT;
+        let is_both = p::PuglEventFlag_PUGL_IS_HINT | p::PuglEventFlag_PUGL_IS_SEND_EVENT;
         assert!(EventFlags::from_bits_truncate(is_both).contains(EventFlags::IS_SEND_EVENT));
         assert!(EventFlags::from_bits_truncate(is_both).contains(EventFlags::IS_HINT));
     }
