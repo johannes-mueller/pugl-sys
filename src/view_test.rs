@@ -381,14 +381,14 @@ mod test {
     }
 
     #[test]
-    fn test_default_hidden() {
+    fn default_hidden() {
 	let mut view = make_view();
 	let ui = view.handle();
 	assert!(!ui.is_visible());
     }
 
     #[test]
-    fn test_show_window_no_size() {
+    fn show_window_no_size() {
 	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
 	let ui = view.handle();
 	assert_eq!(ui.show_window(), Status::BadConfiguration);
@@ -396,7 +396,7 @@ mod test {
     }
 
     #[test]
-    fn test_show_window_default_size() {
+    fn show_window_default_size() {
 	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
 	let ui = view.handle();
 	ui.set_default_size(32, 16);
@@ -408,7 +408,7 @@ mod test {
     }
 
     #[test]
-    fn test_hide_window() {
+    fn hide_window() {
 	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
 	let ui = view.handle();
 	ui.set_default_size(32, 16);
@@ -418,7 +418,7 @@ mod test {
     }
 
     #[test]
-    fn test_show_resize_hide_show() {
+    fn show_resize_hide_show() {
 	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
 	{
 	    let ui = view.handle();
@@ -436,7 +436,7 @@ mod test {
     }
 
     #[test]
-    fn test_mouse_click_event() {
+    fn mouse_click_event() {
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         {
             let ui = view.handle();
@@ -469,7 +469,7 @@ mod test {
     }
 
     #[test]
-    fn test_pointer_enter_leave_event() {
+    fn pointer_enter_leave_event() {
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         view.queue_event(Event { data: EventType::PointerIn, context: EventContext::default() });
         view.queue_event(Event { data: EventType::PointerOut, context: EventContext::default() });
@@ -483,7 +483,7 @@ mod test {
     }
 
     #[test]
-    fn test_window_title() {
+    fn window_title() {
 	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
 	let ui = view.handle();
 	ui.set_window_title("Test Pugl");
