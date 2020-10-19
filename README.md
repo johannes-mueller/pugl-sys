@@ -1,5 +1,12 @@
 # pugl-sys – a rust wrapper for pugl
 
+[![Build Status][travis-badge]][travis-url] [![Current Crates.io Version][crates-badge]][crates-url]
+
+[travis-badge]: https://travis-ci.com/johannes-mueller/pugl-sys.svg?branch=master
+[travis-url]: https://travis-ci.com/johannes-mueller/pugl-sys
+[crates-badge]: https://img.shields.io/crates/v/pugl-sys.svg
+[crates-url]: https://crates.io/crates/pugl-sys
+
 pugl is a minimal portable API for embeddable GUIs https://gitlab.com/lv2/pugl/
 
 This crate aims to provide crate bindings for Rust.
