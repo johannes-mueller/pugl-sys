@@ -376,63 +376,63 @@ mod test {
 
 
     fn make_view() -> Box<PuglView<UI>> {
-	let view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-	view
+        let view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        view
     }
 
     #[test]
     fn default_hidden() {
-	let mut view = make_view();
-	let ui = view.handle();
-	assert!(!ui.is_visible());
+        let mut view = make_view();
+        let ui = view.handle();
+        assert!(!ui.is_visible());
     }
 
     #[test]
     fn show_window_no_size() {
-	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-	let ui = view.handle();
-	assert_eq!(ui.show_window(), Status::BadConfiguration);
-	assert!(!ui.is_visible());
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.show_window(), Status::BadConfiguration);
+        assert!(!ui.is_visible());
     }
 
     #[test]
     fn show_window_default_size() {
-	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-	let ui = view.handle();
-	ui.set_default_size(32, 16);
-	assert_eq!(ui.show_window(), Status::Success);
-	assert!(ui.is_visible());
-	let size = unsafe { (*ui.view()).frame.size };
-	assert_eq!(size.w, 32.0);
-	assert_eq!(size.h, 16.0);
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        ui.set_default_size(32, 16);
+        assert_eq!(ui.show_window(), Status::Success);
+        assert!(ui.is_visible());
+        let size = unsafe { (*ui.view()).frame.size };
+        assert_eq!(size.w, 32.0);
+        assert_eq!(size.h, 16.0);
     }
 
     #[test]
     fn hide_window() {
-	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-	let ui = view.handle();
-	ui.set_default_size(32, 16);
-	ui.show_window();
-	ui.hide_window();
-	assert!(!ui.is_visible());
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        ui.set_default_size(32, 16);
+        ui.show_window();
+        ui.hide_window();
+        assert!(!ui.is_visible());
     }
 
     #[test]
     fn show_resize_hide_show() {
-	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-	{
-	    let ui = view.handle();
-	    ui.set_default_size(32, 16);
-	    ui.show_window();
-	}
-	view.fake_resize(Size { w: 42., h: 23. });
-	let ui = view.handle();
-	ui.hide_window();
-	ui.show_window();
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        {
+            let ui = view.handle();
+            ui.set_default_size(32, 16);
+            ui.show_window();
+        }
+        view.fake_resize(Size { w: 42., h: 23. });
+        let ui = view.handle();
+        ui.hide_window();
+        ui.show_window();
 
-	let size = unsafe { (*ui.view()).frame.size };
-	assert_eq!(size.w, 42.0);
-	assert_eq!(size.h, 23.0);
+        let size = unsafe { (*ui.view()).frame.size };
+        assert_eq!(size.w, 42.0);
+        assert_eq!(size.h, 23.0);
     }
 
     #[test]
@@ -484,12 +484,19 @@ mod test {
 
     #[test]
     fn window_title() {
-	let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-	let ui = view.handle();
-	ui.set_window_title("Test Pugl");
-	unsafe {
-	    assert_eq!((*ui.view()).window_title, "Test Pugl");
-	}
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        ui.set_window_title("Test Pugl");
+        unsafe {
+            assert_eq!((*ui.view()).window_title, "Test Pugl");
+        }
     }
 
+    #[test]
+    fn view_hint_use_compat_profile() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        //ui.set_view_hint();
+
+    }
 }

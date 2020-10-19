@@ -32,7 +32,7 @@
 //!
 //! # Example
 //!
-//! ```
+//! ``` ignore
 //! use pugl_sys::*;
 //! use std::f64::consts::PI;
 //!
@@ -132,6 +132,10 @@ extern crate cairo_sys;
 
 #[macro_use]
 extern crate bitflags;
+
+#[cfg(test)]
+#[macro_use]
+extern crate serial_test;
 
 #[doc(hidden)]
 pub(crate) mod pugl;

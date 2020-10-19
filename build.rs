@@ -38,6 +38,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         .header("pugl/pugl/pugl.h")
         .header("pugl/pugl/pugl_cairo.h")
+        .header("pugl/pugl/pugl_stub.h")
         .clang_arg("-Ipugl")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()

@@ -175,6 +175,12 @@ pub trait PuglViewTrait {
         }
     }
 
+    fn is_resizable(&self) -> bool {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RESIZABLE) != 0
+        }
+    }
+
     /// Sets the window title
     fn set_window_title (&self, title: &str) -> Status {
         unsafe { Status::from(p::puglSetWindowTitle(self.view(), title.as_ptr() as *const i8)) }
@@ -368,6 +374,15 @@ fn event_handler<T: PuglViewTrait>(view_ptr: *mut p::PuglView, event_ptr: *const
     handle.event (event) as p::PuglStatus
 }
 
+#[cfg(test)]
+unsafe fn get_backend() -> *const p::PuglBackend {
+    p::puglStubBackend()
+}
+#[cfg(not (test))]
+unsafe fn get_backend() -> *const p::PuglBackend {
+    p::puglCairoBackend()
+}
+
 impl<T: PuglViewTrait> PuglView<T> {
     /// Sets up a new `PuglView` for a heap allocated object of `T` implementing
     /// [`PuglViewTrait`](trait.PuglViewTrait.html).
@@ -393,7 +408,7 @@ impl<T: PuglViewTrait> PuglView<T> {
             }
             p::puglSetHandle(view.instance, Box::into_raw(ui) as p::PuglHandle);
             p::puglSetEventFunc(view.instance, Some(event_handler::<T>));
-            p::puglSetBackend(view.instance, p::puglCairoBackend());
+            p::puglSetBackend(view.instance, get_backend());
             p::puglSetViewHint(view.instance, p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT, true as i32);
         }
         view
@@ -425,5 +440,53 @@ impl<T: PuglViewTrait> Drop for PuglView<T> {
             p::puglFreeView(instance);
             p::puglFreeWorld(world);
         };
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    struct UI {
+        view: PuglViewFFI
+    }
+
+    impl UI {
+        fn new(view: PuglViewFFI) -> Self { Self { view } }
+    }
+
+    impl PuglViewTrait for UI {
+        fn event(&mut self, _ev: Event) -> Status {
+            Status::Success
+        }
+        fn exposed(&mut self, _expose: &ExposeArea, _cr: &cairo::Context) {}
+        fn resize(&mut self, _size: Size) {}
+        fn close_request(&mut self) {}
+        fn view(&self) -> PuglViewFFI {
+            self.view
+        }
+    }
+
+    #[test]
+    #[serial]
+    fn unresizable() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+
+        ui.set_default_size(42, 23);
+        ui.show_window();
+        assert!(!ui.is_resizable());
+    }
+
+    #[test]
+    #[serial]
+    fn resizable() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+
+        ui.set_default_size(42, 23);
+        ui.make_resizable();
+        ui.show_window();
+        assert!(ui.is_resizable())
     }
 }
