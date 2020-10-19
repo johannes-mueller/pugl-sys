@@ -27,7 +27,7 @@ fn main() {
         .status()
         .expect("waf build failed");
 
-    println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
+    println!("cargo:rustc-link-search=native={}", out_path.to_str().unwrap());
     println!("cargo:rustc-link-lib=static=pugl_x11-0");
     println!("cargo:rustc-link-lib=static=pugl_x11_cairo-0");
     println!("cargo:rustc-flags=-l cairo -l GLU -l GL -lX11 -lXext -lXrandr -lXcursor");
