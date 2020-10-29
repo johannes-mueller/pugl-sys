@@ -581,28 +581,53 @@ impl From<p::PuglStatus> for Status {
     }
 }
 
-#[derive(Debug, PartialEq)]
-enum ViewHint {
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ViewHintBool {
     True,
     False,
     DontCare
 }
 
-impl From<p::PuglViewHintValue> for ViewHint {
-    fn from(pvhv: p::PuglViewHintValue) -> ViewHint {
+impl From<p::PuglViewHintValue> for ViewHintBool {
+    fn from(pvhv: p::PuglViewHintValue) -> ViewHintBool {
         match pvhv {
-            p::PuglViewHintValue_PUGL_TRUE => ViewHint::True,
-            p::PuglViewHintValue_PUGL_FALSE => ViewHint::False,
-            _ => ViewHint::DontCare
+            p::PuglViewHintValue_PUGL_TRUE => ViewHintBool::True,
+            p::PuglViewHintValue_PUGL_FALSE => ViewHintBool::False,
+            _ => ViewHintBool::DontCare
         }
     }
 }
 
-impl From<ViewHint> for p::PuglViewHintValue {
-    fn from(vh: ViewHint) -> p::PuglViewHintValue{
+impl From<ViewHintBool> for p::PuglViewHintValue {
+    fn from(vh: ViewHintBool) -> p::PuglViewHintValue{
         match vh {
-            ViewHint::True => p::PuglViewHintValue_PUGL_TRUE,
-            ViewHint::False => p::PuglViewHintValue_PUGL_FALSE,
+            ViewHintBool::True => p::PuglViewHintValue_PUGL_TRUE,
+            ViewHintBool::False => p::PuglViewHintValue_PUGL_FALSE,
+            _ => p::PuglViewHintValue_PUGL_DONT_CARE
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ViewHintInt {
+    Value(u32),
+    DontCare
+}
+
+impl From<p::PuglViewHintValue> for ViewHintInt {
+    fn from(pvhv: p::PuglViewHintValue) -> ViewHintInt {
+        if pvhv < 0 {
+            ViewHintInt::DontCare
+        } else {
+            ViewHintInt::Value(pvhv as u32)
+        }
+    }
+}
+
+impl From<ViewHintInt> for p::PuglViewHintValue {
+    fn from(vh: ViewHintInt) -> p::PuglViewHintValue {
+        match vh {
+            ViewHintInt::Value(v) => v as i32,
             _ => p::PuglViewHintValue_PUGL_DONT_CARE
         }
     }
@@ -966,38 +991,75 @@ mod test {
     }
 
     #[test]
-    fn from_pugl_view_hint_value_true() {
+    fn from_pugl_view_hint_bool_value_true() {
         let pugl_view_hint_true = p::PuglViewHintValue_PUGL_TRUE;
-        assert_eq!(ViewHint::from(pugl_view_hint_true), ViewHint::True);
+        assert_eq!(ViewHintBool::from(pugl_view_hint_true), ViewHintBool::True);
     }
 
     #[test]
-    fn from_pugl_view_hint_value_false() {
+    fn from_pugl_view_hint_bool_value_false() {
         let pugl_view_hint_false = p::PuglViewHintValue_PUGL_FALSE;
-        assert_eq!(ViewHint::from(pugl_view_hint_false), ViewHint::False);
+        assert_eq!(ViewHintBool::from(pugl_view_hint_false), ViewHintBool::False);
     }
 
     #[test]
-    fn from_pugl_view_hint_value_dontcare() {
+    fn from_pugl_view_hint_bool_value_dontcare() {
         let pugl_view_hint_dontcare = p::PuglViewHintValue_PUGL_DONT_CARE;
-        assert_eq!(ViewHint::from(pugl_view_hint_dontcare), ViewHint::DontCare);
+        assert_eq!(ViewHintBool::from(pugl_view_hint_dontcare), ViewHintBool::DontCare);
     }
 
     #[test]
-    fn to_pugl_view_hint_true() {
-        let view_hint_true = ViewHint::True;
+    fn to_pugl_view_hint_bool_true() {
+        let view_hint_true = ViewHintBool::True;
         assert_eq!(p::PuglViewHintValue::from(view_hint_true), p::PuglViewHintValue_PUGL_TRUE)
     }
 
     #[test]
-    fn to_pugl_view_hint_false() {
-        let view_hint_false = ViewHint::False;
+    fn to_pugl_view_hint_bool_false() {
+        let view_hint_false = ViewHintBool::False;
         assert_eq!(p::PuglViewHintValue::from(view_hint_false), p::PuglViewHintValue_PUGL_FALSE)
     }
 
     #[test]
-    fn to_pugl_view_hint_dontcare() {
-        let view_hint_dontcare = ViewHint::DontCare;
+    fn to_pugl_view_hint_bool_dontcare() {
+        let view_hint_dontcare = ViewHintBool::DontCare;
         assert_eq!(p::PuglViewHintValue::from(view_hint_dontcare), p::PuglViewHintValue_PUGL_DONT_CARE)
     }
+
+    #[test]
+    fn from_pugl_view_hint_int_value() {
+        let pugl_view_hint: i32 = 42;
+        assert_eq!(ViewHintInt::from(pugl_view_hint), ViewHintInt::Value(42));
+    }
+
+    #[test]
+    fn from_pugl_view_hint_int_zero() {
+        let pugl_view_hint: i32 = p::PuglViewHintValue_PUGL_FALSE;
+        assert_eq!(ViewHintInt::from(pugl_view_hint), ViewHintInt::Value(0));
+    }
+
+    #[test]
+    fn from_pugl_view_hint_int_dontcare() {
+        let pugl_view_hint: i32 = p::PuglViewHintValue_PUGL_DONT_CARE;
+        assert_eq!(ViewHintInt::from(pugl_view_hint), ViewHintInt::DontCare);
+    }
+
+    #[test]
+    fn to_pugl_view_hint_bool_value() {
+        let view_hint = ViewHintInt::Value(42);
+        assert_eq!(p::PuglViewHintValue::from(view_hint), 42);
+    }
+
+    #[test]
+    fn to_pugl_view_hint_bool_zero() {
+        let view_hint = ViewHintInt::Value(0);
+        assert_eq!(p::PuglViewHintValue::from(view_hint), p::PuglViewHintValue_PUGL_FALSE);
+    }
+
+    #[test]
+    fn to_pugl_view_hint_bool_dont_care() {
+        let view_hint = ViewHintInt::DontCare;
+        assert_eq!(p::PuglViewHintValue::from(view_hint), p::PuglViewHintValue_PUGL_DONT_CARE);
+    }
+
 }

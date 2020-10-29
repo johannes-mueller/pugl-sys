@@ -181,6 +181,112 @@ pub trait PuglViewTrait {
         }
     }
 
+    fn set_ignore_key_repeats(&self, value: ViewHintBool) -> Status {
+        dbg!(value);
+        unsafe {
+            Status::from(p::puglSetViewHint(
+                self.view(),
+                p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT,
+                p::PuglViewHintValue::from(value)))
+        }
+    }
+
+    fn is_ignoring_key_repeats(&self) -> ViewHintBool {
+        unsafe {
+            ViewHintBool::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT))
+        }
+    }
+
+    fn is_using_compat_profile(&self) -> ViewHintBool {
+        unsafe {
+            ViewHintBool::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_USE_COMPAT_PROFILE))
+        }
+    }
+
+    fn set_use_compat_profile(&self, value: ViewHintBool) -> Status {
+        unsafe {
+            Status::from(p::puglSetViewHint(
+                self.view(),
+                p::PuglViewHint_PUGL_USE_COMPAT_PROFILE,
+                p::PuglViewHintValue::from(value)))
+        }
+    }
+
+    fn opengl_context_version_major(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_CONTEXT_VERSION_MAJOR) as u32
+        }
+    }
+
+    fn opengl_context_version_minor(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_CONTEXT_VERSION_MINOR) as u32
+        }
+    }
+
+    fn red_bits(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RED_BITS) as u32
+        }
+    }
+
+    fn green_bits(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_GREEN_BITS) as u32
+        }
+    }
+
+    fn alpha_bits(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_ALPHA_BITS) as u32
+        }
+    }
+
+    fn blue_bits(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_BLUE_BITS) as u32
+        }
+    }
+
+    fn depth_bits(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_DEPTH_BITS) as u32
+        }
+    }
+
+    fn stencil_bits(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_STENCIL_BITS) as u32
+        }
+    }
+
+    fn samples(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_SAMPLES) as u32
+        }
+    }
+
+    fn double_buffer(&self) -> bool {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_DOUBLE_BUFFER) == 1
+        }
+    }
+
+    fn set_double_buffer(&self, yn: bool) -> Status {
+        let v = if yn {
+            1
+        } else {
+            0
+        };
+        unsafe {
+            Status::from(p::puglSetViewHint(self.view(), p::PuglViewHint_PUGL_DOUBLE_BUFFER, v))
+        }
+    }
+
+    fn swap_interval(&self) -> ViewHintInt {
+        ViewHintInt::DontCare
+    }
+
     /// Sets the window title
     fn set_window_title (&self, title: &str) -> Status {
         unsafe { Status::from(p::puglSetWindowTitle(self.view(), title.as_ptr() as *const i8)) }
@@ -446,6 +552,7 @@ impl<T: PuglViewTrait> Drop for PuglView<T> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::types::*;
 
     struct UI {
         view: PuglViewFFI
@@ -489,4 +596,144 @@ mod test {
         ui.show_window();
         assert!(ui.is_resizable())
     }
+
+    #[test]
+    #[serial]
+    fn not_ignore_key_repeat() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+
+        ui.set_default_size(42, 23);
+        ui.set_ignore_key_repeats(ViewHintBool::False);
+        ui.show_window();
+        assert_eq!(ui.is_ignoring_key_repeats(), ViewHintBool::False);
+    }
+
+    #[test]
+    #[serial]
+    fn ignore_key_repeat() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+
+        ui.set_default_size(42, 23);
+        ui.show_window();
+        assert_eq!(ui.is_ignoring_key_repeats(), ViewHintBool::True);
+    }
+
+    #[test]
+    #[serial]
+    fn use_compat_profile() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+
+        ui.set_default_size(42, 23);
+        ui.show_window();
+        assert_eq!(ui.is_using_compat_profile(), ViewHintBool::True);
+    }
+
+    #[test]
+    #[serial]
+    fn not_use_compat_profile() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+
+        ui.set_default_size(42, 23);
+        ui.set_use_compat_profile(ViewHintBool::False);
+        ui.show_window();
+        assert_eq!(ui.is_using_compat_profile(), ViewHintBool::False);
+    }
+
+    #[test]
+    #[serial]
+    fn opengl_context_version_major() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.opengl_context_version_major(), 2);
+    }
+
+    #[test]
+    #[serial]
+    fn opengl_context_version_minor() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.opengl_context_version_minor(), 0);
+    }
+
+    #[serial]
+    #[test]
+    fn red_bits() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.red_bits(), 8);
+    }
+
+    #[serial]
+    #[test]
+    fn green_bits() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.green_bits(), 8);
+    }
+
+    #[serial]
+    #[test]
+    fn blue_bits() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.blue_bits(), 8);
+    }
+
+    #[serial]
+    #[test]
+    fn alpha_bits() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.alpha_bits(), 8);
+    }
+
+    #[serial]
+    #[test]
+    fn depth_bits() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.depth_bits(), 0);
+    }
+
+    #[serial]
+    #[test]
+    fn stencil_bits() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.stencil_bits(), 0);
+    }
+
+    #[serial]
+    #[test]
+    fn samples() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.samples(), 0);
+    }
+
+    #[serial]
+    #[test]
+    fn double_buffer() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.double_buffer(), true);
+        ui.set_double_buffer(false);
+        assert_eq!(ui.double_buffer(), false);
+    }
+
+    #[serial]
+    #[test]
+    fn swap_interaval() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.swap_interval(), ViewHintInt::DontCare);
+        ui.set_default_size(42, 23);
+        ui.show_window();
+        assert_eq!(ui.swap_interval(), ViewHintInt::DontCare);
+    }
+
 }
