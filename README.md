@@ -93,6 +93,6 @@ Not all features of pugl are implemented.
 
 * Some minor functions are not wrapped
 
-* `PuglViewHint` is not properly wrapped except for `PUGL_RESIZABLE`
+* Properly implement `PuglViewHint`
 
 * Test (and make it work) on platforms other than Linux
