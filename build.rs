@@ -36,10 +36,10 @@ fn main() {
     // to bindgen, and lets you build up options for
     // the resulting bindings.
     let bindings = bindgen::Builder::default()
-        .header("pugl/pugl/pugl.h")
-        .header("pugl/pugl/pugl_cairo.h")
-        .header("pugl/pugl/pugl_stub.h")
-        .clang_arg("-Ipugl")
+        .header("pugl/pugl.h")
+        .header("pugl/cairo.h")
+        .header("pugl/include/pugl/stub.h")
+        .clang_arg("-Ipugl/include")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
         .expect("Unable to generate bindings");
