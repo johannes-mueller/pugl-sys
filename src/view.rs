@@ -284,7 +284,15 @@ pub trait PuglViewTrait {
     }
 
     fn swap_interval(&self) -> ViewHintInt {
-        ViewHintInt::DontCare
+        unsafe {
+            ViewHintInt::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_SWAP_INTERVAL))
+        }
+    }
+
+    fn refresh_rate(&self) -> ViewHintInt {
+        unsafe {
+            ViewHintInt::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_REFRESH_RATE))
+        }
     }
 
     /// Sets the window title
@@ -736,4 +744,14 @@ mod test {
         assert_eq!(ui.swap_interval(), ViewHintInt::DontCare);
     }
 
+    #[serial]
+    #[test]
+    fn refresh_rate() {
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        assert_eq!(ui.refresh_rate(), ViewHintInt::DontCare);
+        ui.set_default_size(42, 23);
+        ui.show_window();
+        assert_ne!(ui.refresh_rate(), ViewHintInt::DontCare);
+    }
 }
