@@ -22,3 +22,7 @@ install:
 jobs:
   allow_failures:
     - rust: nightly
+
+script:
+  - cargo build --workspace
+  - cargo test --workspace
