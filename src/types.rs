@@ -581,6 +581,7 @@ impl From<p::PuglStatus> for Status {
     }
 }
 
+/// Used to communicate bool hints between the application and the view
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ViewHintBool {
     True,
@@ -608,6 +609,7 @@ impl From<ViewHintBool> for p::PuglViewHintValue {
     }
 }
 
+/// Used to communicate unsigned ints bettween the application and the view
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ViewHintInt {
     Value(u32),

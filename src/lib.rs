@@ -140,28 +140,26 @@ extern crate serial_test;
 #[doc(hidden)]
 pub(crate) mod pugl;
 
-#[macro_use]
 #[doc(hidden)]
+#[macro_use]
 pub mod types;
 
+#[doc(inline)]
 pub use types::*;
 
 #[doc(hidden)]
-pub use types::*;
-
-#[doc(hidden)]
-#[cfg(not(feature= "testing"))]
+#[cfg(not(feature="testing"))]
 pub mod view;
 
 #[doc(inline)]
-#[cfg(not(feature= "testing"))]
+#[cfg(not(feature="testing"))]
 pub use view::*;
 
 
 #[doc(hidden)]
-#[cfg(feature= "testing")]
+#[cfg(feature="testing")]
 pub mod view_test;
 
 #[doc(inline)]
-#[cfg(feature= "testing")]
+#[cfg(feature="testing")]
 pub use view_test::*;

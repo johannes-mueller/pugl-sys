@@ -164,6 +164,13 @@ pub trait PuglViewTrait {
         unsafe { Status::from(p::puglSetAspectRatio(self.view(), min_x, min_y, max_x, max_y)) }
     }
 
+    /// Returns true iff the window is resizable
+    fn is_resizable(&self) -> bool {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RESIZABLE) != 0
+        }
+    }
+
     /// Make the view resizable.
     ///
     /// This should be called before [[`show_window()`](#method.show_window)](#method.show_window) and [`realize()`](#method.realize).
@@ -175,14 +182,16 @@ pub trait PuglViewTrait {
         }
     }
 
-    fn is_resizable(&self) -> bool {
+    /// Returns a [`ViewHintBool`](enum.ViewHintBool.html) whether the view is ignoring
+    /// key repeats.
+    fn is_ignoring_key_repeats(&self) -> ViewHintBool {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RESIZABLE) != 0
+            ViewHintBool::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT))
         }
     }
 
+    /// Gives the view the hint whether it should ignore key repeats.
     fn set_ignore_key_repeats(&self, value: ViewHintBool) -> Status {
-        dbg!(value);
         unsafe {
             Status::from(p::puglSetViewHint(
                 self.view(),
@@ -191,60 +200,63 @@ pub trait PuglViewTrait {
         }
     }
 
-    fn is_ignoring_key_repeats(&self) -> ViewHintBool {
-        unsafe {
-            ViewHintBool::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT))
-        }
-    }
-
+    /// Returns the number of bits for the red channel of the view
     fn red_bits(&self) -> u32 {
         unsafe {
             p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RED_BITS) as u32
         }
     }
 
+    /// Returns the number of bits for the green channel of the view
     fn green_bits(&self) -> u32 {
         unsafe {
             p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_GREEN_BITS) as u32
         }
     }
 
-    fn alpha_bits(&self) -> u32 {
-        unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_ALPHA_BITS) as u32
-        }
-    }
-
+    /// Returns the number of bits for the blue channel of the view
     fn blue_bits(&self) -> u32 {
         unsafe {
             p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_BLUE_BITS) as u32
         }
     }
 
+    /// Returns the number of bits for the alpha channel of the view
+    fn alpha_bits(&self) -> u32 {
+        unsafe {
+            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_ALPHA_BITS) as u32
+        }
+    }
+
+    /// Returns the number of bits for the depth buffer of the view
     fn depth_bits(&self) -> u32 {
         unsafe {
             p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_DEPTH_BITS) as u32
         }
     }
 
+    /// Returns the number of bits for the stencil buffer of the view
     fn stencil_bits(&self) -> u32 {
         unsafe {
             p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_STENCIL_BITS) as u32
         }
     }
 
+    /// Returns the number of samples per pixel
     fn samples(&self) -> u32 {
         unsafe {
             p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_SAMPLES) as u32
         }
     }
 
+    /// Returns true iff double buffering should be used
     fn double_buffer(&self) -> bool {
         unsafe {
             p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_DOUBLE_BUFFER) == 1
         }
     }
 
+    /// Sets whether double buffering should be used
     fn set_double_buffer(&self, yn: bool) -> Status {
         let v = if yn {
             1
@@ -256,12 +268,14 @@ pub trait PuglViewTrait {
         }
     }
 
+    /// Returns number of frames between buffer swaps
     fn swap_interval(&self) -> ViewHintInt {
         unsafe {
             ViewHintInt::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_SWAP_INTERVAL))
         }
     }
 
+    /// Returns the refresh rate in Hz
     fn refresh_rate(&self) -> ViewHintInt {
         unsafe {
             ViewHintInt::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_REFRESH_RATE))
@@ -533,7 +547,6 @@ impl<T: PuglViewTrait> Drop for PuglView<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::types::*;
 
     struct UI {
         view: PuglViewFFI
