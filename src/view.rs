@@ -197,33 +197,6 @@ pub trait PuglViewTrait {
         }
     }
 
-    fn is_using_compat_profile(&self) -> ViewHintBool {
-        unsafe {
-            ViewHintBool::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_USE_COMPAT_PROFILE))
-        }
-    }
-
-    fn set_use_compat_profile(&self, value: ViewHintBool) -> Status {
-        unsafe {
-            Status::from(p::puglSetViewHint(
-                self.view(),
-                p::PuglViewHint_PUGL_USE_COMPAT_PROFILE,
-                p::PuglViewHintValue::from(value)))
-        }
-    }
-
-    fn opengl_context_version_major(&self) -> u32 {
-        unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_CONTEXT_VERSION_MAJOR) as u32
-        }
-    }
-
-    fn opengl_context_version_minor(&self) -> u32 {
-        unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_CONTEXT_VERSION_MINOR) as u32
-        }
-    }
-
     fn red_bits(&self) -> u32 {
         unsafe {
             p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RED_BITS) as u32
@@ -626,45 +599,6 @@ mod test {
         ui.set_default_size(42, 23);
         ui.show_window();
         assert_eq!(ui.is_ignoring_key_repeats(), ViewHintBool::True);
-    }
-
-    #[test]
-    #[serial]
-    fn use_compat_profile() {
-        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-        let ui = view.handle();
-
-        ui.set_default_size(42, 23);
-        ui.show_window();
-        assert_eq!(ui.is_using_compat_profile(), ViewHintBool::True);
-    }
-
-    #[test]
-    #[serial]
-    fn not_use_compat_profile() {
-        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-        let ui = view.handle();
-
-        ui.set_default_size(42, 23);
-        ui.set_use_compat_profile(ViewHintBool::False);
-        ui.show_window();
-        assert_eq!(ui.is_using_compat_profile(), ViewHintBool::False);
-    }
-
-    #[test]
-    #[serial]
-    fn opengl_context_version_major() {
-        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-        let ui = view.handle();
-        assert_eq!(ui.opengl_context_version_major(), 2);
-    }
-
-    #[test]
-    #[serial]
-    fn opengl_context_version_minor() {
-        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
-        let ui = view.handle();
-        assert_eq!(ui.opengl_context_version_minor(), 0);
     }
 
     #[serial]
