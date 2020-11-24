@@ -1,6 +1,6 @@
 [package]
 name = "pugl-sys"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Johannes Mueller <github@johannes-mueller.org>"]
 edition = "2018"
 description = "A Rust wrapper for pugl"
