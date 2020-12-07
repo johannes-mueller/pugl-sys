@@ -283,8 +283,13 @@ pub trait PuglViewTrait {
     }
 
     /// Sets the window title
-    fn set_window_title (&self, title: &str) -> Status {
-        unsafe { Status::from(p::puglSetWindowTitle(self.view(), title.as_ptr() as *const i8)) }
+    fn set_window_title(&self, title: &str) -> Status {
+        let title =
+            std::ffi::CString::new(title.as_bytes())
+                .expect("window title must not contain 0 bytes");
+        unsafe {
+            Status::from(p::puglSetWindowTitle(self.view(), title.into_raw()))
+        }
     }
 
     /// Realize a view by creating a corresponding system view or window.
