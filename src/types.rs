@@ -286,9 +286,10 @@ impl Key {
 
 impl From<p::PuglEventKey> for KeyVal {
     fn from(ke: p::PuglEventKey) -> KeyVal {
-        match ke.key {
-            0 => KeyVal::Special (SpecialKey::from(ke.keycode)),
-            _ => KeyVal::Character (char::from_u32(ke.key).unwrap())
+        let special_key = SpecialKey::from(ke.key);
+        match special_key {
+            SpecialKey::None => KeyVal::Character (char::from_u32(ke.key).unwrap()),
+            _ => KeyVal::Special (special_key),
         }
     }
 }
@@ -739,8 +740,8 @@ mod test {
             xRoot: 123.0,
             yRoot: 142.0,
             state: p::PuglMod_PUGL_MOD_CTRL | p::PuglMod_PUGL_MOD_ALT,
-            keycode: p::PuglKey_PUGL_KEY_F1,
-            key: 0, // 'A'
+            keycode: 0,
+            key: p::PuglKey_PUGL_KEY_F1,
         }
     }
 
