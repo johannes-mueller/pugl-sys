@@ -17,6 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt install libgl-dev libglu1-mesa-dev libxrandr-dev libxcursor-dev xvfb
+    - run: git submodule update --init --recursive 
     - name: Build
       run: cargo build 
     - run: export DISPLAY=':99.0'
