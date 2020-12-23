@@ -21,4 +21,6 @@ jobs:
     - name: Build
       run: cargo build --release
     - name: Upload to crates.io
-      run: cargo publish --dry-run
+      run: |
+        cargo login ${{ secrets.CRATES_IO }} 
+        cargo publish --dry-run
