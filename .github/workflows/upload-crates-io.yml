@@ -3,7 +3,7 @@ name: Rust
 on:
   release:
     types: [published]
-    
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -17,10 +17,10 @@ jobs:
     - name: Install additional dependencies
       run: sudo apt install libgl-dev libglu1-mesa-dev libxrandr-dev libxcursor-dev xvfb
     - name: Fetch submodules
-      run: git submodule update --init --recursive 
+      run: git submodule update --init --recursive
     - name: Build
       run: cargo build --release
     - name: Upload to crates.io
       run: |
-        cargo login ${{ secrets.CRATES_IO }} 
-        cargo publish --dry-run
+        cargo login ${{ secrets.CRATES_IO }}
+        cargo publish
