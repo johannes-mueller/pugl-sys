@@ -318,7 +318,7 @@ pub trait PuglViewTrait {
     /// If the view is currently hidden, it will be shown and possibly
     /// raised to the top depending on the platform.
     fn show_window(&self) -> Status {
-        unsafe { Status::from(pffi::puglShowWindow(self.view())) }
+        unsafe { Status::from(pffi::puglShow(self.view())) }
     }
 
     /// Hide the current window
@@ -834,10 +834,10 @@ mod test {
         let _expectations = setup_expectations();
         let _set_size_expectation = setup_set_size_expectation();
 
-        let ctx = pffi::puglShowWindow_context();
+        let ctx = pffi::puglShow_context();
         ctx.expect()
             .returning(|view| unsafe {
-                rffi::puglShowWindow(view)
+                rffi::puglShow(view)
             });
 
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));

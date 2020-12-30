@@ -11,7 +11,6 @@ pub struct PuglView<T: PuglViewTrait> {
     instance: PuglViewFFI
 }
 
-
 impl<T: PuglViewTrait> PuglView<T> {
     pub fn new<F>(_parent_window: *mut std::ffi::c_void, new: F) -> Box<Self>
     where F: FnOnce(PuglViewFFI) -> T {
