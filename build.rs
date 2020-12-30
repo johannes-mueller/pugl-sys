@@ -11,7 +11,7 @@ fn main() {
     Command::new("python")
         .current_dir("pugl")
         .env("CFLAGS", "-fPIC")
-	.arg("-B")
+        .arg("-B")
         .arg("waf")
         .arg("configure")
         .arg(format!("--out={}", out_path.to_str().unwrap()))
@@ -21,7 +21,7 @@ fn main() {
     Command::new("python")
         .current_dir("pugl")
         .env("CFLAGS", "-fPIC")
-	.arg("-B")
+        .arg("-B")
         .arg("waf")
         .arg("build")
         .status()
@@ -36,16 +36,36 @@ fn main() {
     // to bindgen, and lets you build up options for
     // the resulting bindings.
     let bindings = bindgen::Builder::default()
-        .header("pugl/pugl.h")
-        .header("pugl/cairo.h")
-        .header("pugl/include/pugl/stub.h")
+        .header("pugl/include/pugl/pugl.h")
+        .header("pugl/include/pugl/cairo.h")
+        .blacklist_function("pugl.*")
+        .layout_tests(false)
         .clang_arg("-Ipugl/include")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
-        .expect("Unable to generate bindings");
+        .expect("Unable to generate bindings")
+        .to_string();
 
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
+    let mut bindings_string ="#[cfg(test)] use mockall::automock;\n"
+        .to_owned();
+    bindings_string.push_str("#[cfg_attr(test, automock)]\npub(crate) mod pffi {\nuse super::*;\n");
+    bindings_string.push_str(&bindgen::Builder::default()
+                             .header("pugl/include/pugl/pugl.h")
+                             .header("pugl/include/pugl/stub.h")
+                             .header("pugl/include/pugl/cairo.h")
+                             .blacklist_type(".*")
+                             .whitelist_function("pugl.*")
+                             .layout_tests(false)
+                             .clang_arg("-Ipugl/include")
+                             .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+                             .generate()
+                             .expect("Unable to generate bindings")
+                             .to_string());
+    bindings_string.push_str("}\n");
+    bindings_string.push_str(&bindings);
+
+    let bindgen_path = out_path.join("bindings.rs");
+    fs::write(bindgen_path, bindings_string.as_bytes())
         .expect("Couldn't write bindings!");
 
     // FIXME: do this properly

@@ -3,6 +3,9 @@ use std::marker::PhantomData;
 use crate::types::*;
 use crate::pugl as p;
 
+use mockall_double::double;
+#[double] use crate::pugl::pffi;
+
 pub type PuglViewFFI = *mut p::PuglView;
 
 /// The central trait for an object of a pugl "UI"
@@ -76,7 +79,7 @@ pub trait PuglViewTrait {
 
     /// Returns a pointer to the `PugleWorld`
     fn world (&self) -> *mut p::PuglWorld {
-        unsafe { p::puglGetWorld(self.view() as *mut p::PuglView) }
+        unsafe { pffi::puglGetWorld(self.view() as PuglViewFFI) }
     }
 
     /// Request a redisplay for the entire view.
@@ -88,7 +91,7 @@ pub trait PuglViewTrait {
     /// an expose will be enqueued to be processed in the next event
     /// loop iteration.
     fn post_redisplay (&self) -> Status {
-        unsafe { Status::from(p::puglPostRedisplay(self.view())) }
+        unsafe { Status::from(pffi::puglPostRedisplay(self.view())) }
     }
 
     /// Request a redisplay of the given rectangle within the view.
@@ -103,21 +106,21 @@ pub trait PuglViewTrait {
             width: size.w,
             height: size.h
         };
-        unsafe { Status::from(p::puglPostRedisplayRect(self.view(), p_rect)) }
+        unsafe { Status::from(pffi::puglPostRedisplayRect(self.view(), p_rect)) }
     }
 
     ///  Get the current position and size of the view.
     ///
     ///  The position is in screen coordinates with an upper left origin.
     fn get_frame(&self) -> Rect {
-        unsafe { p::puglGetFrame(self.view()).into() }
+        unsafe { pffi::puglGetFrame(self.view()).into() }
     }
 
     /// Set the current position and size of the view.
     ///
     /// The position is in screen coordinates with an upper left origin.
     fn set_frame (&self, frame: Rect) -> Status {
-        unsafe { Status::from(p::puglSetFrame(self.view(), frame.into())) }
+        unsafe { Status::from(pffi::puglSetFrame(self.view(), frame.into())) }
     }
 
     /// Set the default size of the view.
@@ -127,7 +130,7 @@ pub trait PuglViewTrait {
     /// the view, which will be the initial size of the window if this
     /// is a top level view.
     fn set_default_size(&self, width: i32, height: i32) -> Status {
-        unsafe { Status::from(p::puglSetDefaultSize(self.view(), width, height)) }
+        unsafe { Status::from(pffi::puglSetDefaultSize(self.view(), width, height)) }
     }
 
     /// Set the minimum size of the view.
@@ -136,7 +139,7 @@ pub trait PuglViewTrait {
     /// before [`realize()`](#method.realize) and [`show_window()`](#method.show_window)
     /// to avoid stutter, though it can be called afterwards as well.
     fn set_min_size (&self, width: i32, height: i32) -> Status {
-        unsafe { Status::from(p::puglSetMinSize(self.view(), width, height)) }
+        unsafe { Status::from(pffi::puglSetMinSize(self.view(), width, height)) }
     }
 
     /// Set the maximum size of the view.
@@ -145,7 +148,7 @@ pub trait PuglViewTrait {
     /// before [`realize()`](#method.realize) and [`show_window()`](#method.show_window) to
     /// avoid stutter, though it can be called afterwards as well.
     fn set_max_size (&self, width: i32, height: i32) -> Status {
-        unsafe { Status::from(p::puglSetMaxSize(self.view(), width, height)) }
+        unsafe { Status::from(pffi::puglSetMaxSize(self.view(), width, height)) }
     }
 
     /// Set the view aspect ratio range.
@@ -161,13 +164,13 @@ pub trait PuglViewTrait {
     /// before [`realize()`](#method.realize) and [`show_window()`](#method.show_window) to avoid stutter,
     /// though it can be called afterwards as well
     fn set_aspect_ratio(&self, min_x: i32, min_y: i32, max_x: i32, max_y: i32) -> Status {
-        unsafe { Status::from(p::puglSetAspectRatio(self.view(), min_x, min_y, max_x, max_y)) }
+        unsafe { Status::from(pffi::puglSetAspectRatio(self.view(), min_x, min_y, max_x, max_y)) }
     }
 
     /// Returns true iff the window is resizable
     fn is_resizable(&self) -> bool {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RESIZABLE) != 0
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RESIZABLE) != 0
         }
     }
 
@@ -176,7 +179,7 @@ pub trait PuglViewTrait {
     /// This should be called before [[`show_window()`](#method.show_window)](#method.show_window) and [`realize()`](#method.realize).
     fn make_resizable(&self) -> Status {
         unsafe {
-            Status::from(p::puglSetViewHint(
+            Status::from(pffi::puglSetViewHint(
                 self.view(),
                 p::PuglViewHint_PUGL_RESIZABLE, p::PuglViewHintValue_PUGL_TRUE))
         }
@@ -186,14 +189,14 @@ pub trait PuglViewTrait {
     /// key repeats.
     fn is_ignoring_key_repeats(&self) -> ViewHintBool {
         unsafe {
-            ViewHintBool::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT))
+            ViewHintBool::from(pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT))
         }
     }
 
     /// Gives the view the hint whether it should ignore key repeats.
     fn set_ignore_key_repeats(&self, value: ViewHintBool) -> Status {
         unsafe {
-            Status::from(p::puglSetViewHint(
+            Status::from(pffi::puglSetViewHint(
                 self.view(),
                 p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT,
                 p::PuglViewHintValue::from(value)))
@@ -203,56 +206,56 @@ pub trait PuglViewTrait {
     /// Returns the number of bits for the red channel of the view
     fn red_bits(&self) -> u32 {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RED_BITS) as u32
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_RED_BITS) as u32
         }
     }
 
     /// Returns the number of bits for the green channel of the view
     fn green_bits(&self) -> u32 {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_GREEN_BITS) as u32
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_GREEN_BITS) as u32
         }
     }
 
     /// Returns the number of bits for the blue channel of the view
     fn blue_bits(&self) -> u32 {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_BLUE_BITS) as u32
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_BLUE_BITS) as u32
         }
     }
 
     /// Returns the number of bits for the alpha channel of the view
     fn alpha_bits(&self) -> u32 {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_ALPHA_BITS) as u32
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_ALPHA_BITS) as u32
         }
     }
 
     /// Returns the number of bits for the depth buffer of the view
     fn depth_bits(&self) -> u32 {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_DEPTH_BITS) as u32
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_DEPTH_BITS) as u32
         }
     }
 
     /// Returns the number of bits for the stencil buffer of the view
     fn stencil_bits(&self) -> u32 {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_STENCIL_BITS) as u32
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_STENCIL_BITS) as u32
         }
     }
 
     /// Returns the number of samples per pixel
     fn samples(&self) -> u32 {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_SAMPLES) as u32
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_SAMPLES) as u32
         }
     }
 
     /// Returns true iff double buffering should be used
     fn double_buffer(&self) -> bool {
         unsafe {
-            p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_DOUBLE_BUFFER) == 1
+            pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_DOUBLE_BUFFER) == 1
         }
     }
 
@@ -264,21 +267,21 @@ pub trait PuglViewTrait {
             0
         };
         unsafe {
-            Status::from(p::puglSetViewHint(self.view(), p::PuglViewHint_PUGL_DOUBLE_BUFFER, v))
+            Status::from(pffi::puglSetViewHint(self.view(), p::PuglViewHint_PUGL_DOUBLE_BUFFER, v))
         }
     }
 
     /// Returns number of frames between buffer swaps
     fn swap_interval(&self) -> ViewHintInt {
         unsafe {
-            ViewHintInt::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_SWAP_INTERVAL))
+            ViewHintInt::from(pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_SWAP_INTERVAL))
         }
     }
 
     /// Returns the refresh rate in Hz
     fn refresh_rate(&self) -> ViewHintInt {
         unsafe {
-            ViewHintInt::from(p::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_REFRESH_RATE))
+            ViewHintInt::from(pffi::puglGetViewHint(self.view(), p::PuglViewHint_PUGL_REFRESH_RATE))
         }
     }
 
@@ -288,7 +291,7 @@ pub trait PuglViewTrait {
             std::ffi::CString::new(title.as_bytes())
                 .expect("window title must not contain 0 bytes");
         unsafe {
-            Status::from(p::puglSetWindowTitle(self.view(), title.into_raw()))
+            Status::from(pffi::puglSetWindowTitle(self.view(), title.into_raw()))
         }
     }
 
@@ -304,7 +307,7 @@ pub trait PuglViewTrait {
     /// The view should be fully configured using the above functions before this is
     /// called.  This function may only be called once per view.
     fn realize(&self) -> Status {
-        unsafe { Status::from(p::puglRealize(self.view())) }
+        unsafe { Status::from(pffi::puglRealize(self.view())) }
     }
 
     /// Show the view.
@@ -315,17 +318,17 @@ pub trait PuglViewTrait {
     /// If the view is currently hidden, it will be shown and possibly
     /// raised to the top depending on the platform.
     fn show_window(&self) -> Status {
-        unsafe { Status::from(p::puglShowWindow(self.view())) }
+        unsafe { Status::from(pffi::puglShowWindow(self.view())) }
     }
 
     /// Hide the current window
     fn hide_window(&self) -> Status {
-        unsafe { Status::from(p::puglHideWindow(self.view())) }
+        unsafe { Status::from(pffi::puglHideWindow(self.view())) }
     }
 
     /// Return true iff the view is currently visible.
     fn is_visible(&self) -> bool {
-        unsafe { p::puglGetVisible(self.view()) }
+        unsafe { pffi::puglGetVisible(self.view()) }
     }
 
     /// Set the mouse cursor.
@@ -335,7 +338,7 @@ pub trait PuglViewTrait {
     /// not supported on this system, for example if compiled on X11
     /// without Xcursor support.
     fn set_cursor(&self, c: Cursor) -> Status {
-        unsafe { Status::from(p::puglSetCursor(self.view(), c.into())) }
+        unsafe { Status::from(pffi::puglSetCursor(self.view(), c.into())) }
     }
 
     /// Update by processing events from the window system.
@@ -363,7 +366,7 @@ pub trait PuglViewTrait {
     /// `Status::Success` if events are read,
     /// `Status::Failure` if not, or an error.
     fn update (&self, timeout: f64) -> Status {
-        unsafe { Status::from(p::puglUpdate(self.world(), timeout)) }
+        unsafe { Status::from(pffi::puglUpdate(self.world(), timeout)) }
     }
 
     /// Activate a repeating timer event.
@@ -397,7 +400,7 @@ pub trait PuglViewTrait {
     /// `Status::Success` or `Status::Failure` if timers are not
     /// supported on the system
     fn start_timer(&self, id: usize, timeout: f64) -> Status {
-        unsafe { Status::from(p::puglStartTimer(self.view(), id, timeout)) }
+        unsafe { Status::from(pffi::puglStartTimer(self.view(), id, timeout)) }
     }
 
     /// Stop an active timer
@@ -408,7 +411,7 @@ pub trait PuglViewTrait {
     /// ## Returns
     /// `Status::Success` or `Status::Failure` if no such timer was found.
     fn stop_timer(&self, id: usize) -> Status {
-        unsafe { Status::from(p::puglStopTimer(self.view(), id)) }
+        unsafe { Status::from(pffi::puglStopTimer(self.view(), id)) }
     }
 }
 
@@ -422,9 +425,9 @@ pub struct PuglView<T: PuglViewTrait> {
 
 
 unsafe extern "C"
-fn event_handler<T: PuglViewTrait>(view_ptr: *mut p::PuglView, event_ptr: *const p::PuglEvent) -> p::PuglStatus {
+fn event_handler<T: PuglViewTrait>(view_ptr: PuglViewFFI, event_ptr: *const p::PuglEvent) -> p::PuglStatus {
     let ev = *event_ptr;
-    let handle: &mut T = &mut *(p::puglGetHandle(view_ptr) as *mut T);
+    let handle: &mut T = &mut *(pffi::puglGetHandle(view_ptr) as *mut T);
     //eprintln!("event_handler: {:?}", ev.type_);
     let event = match ev.type_ {
         p::PuglEventType_PUGL_KEY_PRESS => {
@@ -465,7 +468,7 @@ fn event_handler<T: PuglViewTrait>(view_ptr: *mut p::PuglView, event_ptr: *const
             return p::PuglStatus_PUGL_SUCCESS
         }
         p::PuglEventType_PUGL_EXPOSE => {
-            let cr = cairo::Context::from_raw_borrow (p::puglGetContext(view_ptr) as *mut cairo_sys::cairo_t);
+            let cr = cairo::Context::from_raw_borrow (pffi::puglGetContext(view_ptr) as *mut cairo_sys::cairo_t);
             handle.exposed (&ExposeArea::from(ev.expose), &cr);
             return p::PuglStatus_PUGL_SUCCESS
         },
@@ -482,11 +485,11 @@ fn event_handler<T: PuglViewTrait>(view_ptr: *mut p::PuglView, event_ptr: *const
 
 #[cfg(test)]
 unsafe fn get_backend() -> *const p::PuglBackend {
-    p::puglStubBackend()
+    pffi::puglStubBackend()
 }
 #[cfg(not (test))]
 unsafe fn get_backend() -> *const p::PuglBackend {
-    p::puglCairoBackend()
+    pffi::puglCairoBackend()
 }
 
 impl<T: PuglViewTrait> PuglView<T> {
@@ -501,21 +504,21 @@ impl<T: PuglViewTrait> PuglView<T> {
     pub fn new<F>(parent_window: *mut std::ffi::c_void, new: F) -> Box<Self>
     where F: FnOnce(PuglViewFFI) -> T {
         let view = Box::new(PuglView::<T> {
+            ui_type: PhantomData,
             instance: unsafe {
-                p::puglNewView(p::puglNewWorld(p::PuglWorldType_PUGL_PROGRAM, 0))
-            },
-            ui_type: PhantomData
+                pffi::puglNewView(pffi::puglNewWorld(p::PuglWorldType_PUGL_PROGRAM, 0))
+            }
         });
 
         let ui = Box::new(new(view.instance));
         unsafe {
             if !parent_window.is_null() {
-                p::puglSetParentWindow(view.instance, parent_window as usize);
+                pffi::puglSetParentWindow(view.instance, parent_window as usize);
             }
-            p::puglSetHandle(view.instance, Box::into_raw(ui) as p::PuglHandle);
-            p::puglSetEventFunc(view.instance, Some(event_handler::<T>));
-            p::puglSetBackend(view.instance, get_backend());
-            p::puglSetViewHint(view.instance, p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT, true as i32);
+            pffi::puglSetHandle(view.instance, Box::into_raw(ui) as p::PuglHandle);
+            pffi::puglSetEventFunc(view.instance, Some(event_handler::<T>));
+            pffi::puglSetBackend(view.instance, get_backend());
+            pffi::puglSetViewHint(view.instance, p::PuglViewHint_PUGL_IGNORE_KEY_REPEAT, true as i32);
         }
         view
     }
@@ -523,7 +526,7 @@ impl<T: PuglViewTrait> PuglView<T> {
     /// Returns a handle to the object `T`
     pub fn handle(&mut self) -> &mut T {
         unsafe {
-            &mut *(p::puglGetHandle(self.instance) as *mut T) as &mut T
+            &mut *(pffi::puglGetHandle(self.instance) as *mut T) as &mut T
         }
     }
 
@@ -534,17 +537,17 @@ impl<T: PuglViewTrait> PuglView<T> {
 
     /// Retuns a handle to the native window
     pub fn native_window(&self) -> p::PuglNativeView {
-        unsafe { p::puglGetNativeWindow(self.view()) }
+        unsafe { pffi::puglGetNativeWindow(self.view()) }
     }
 }
 
 impl<T: PuglViewTrait> Drop for PuglView<T> {
     fn drop(&mut self) {
         unsafe {
-            let instance = self.instance as *mut p::PuglView;
-            let world = p::puglGetWorld(instance);
-            p::puglFreeView(instance);
-            p::puglFreeWorld(world);
+            let instance = self.instance as PuglViewFFI;
+            let world = pffi::puglGetWorld(instance);
+            pffi::puglFreeView(instance);
+            pffi::puglFreeWorld(world);
         };
     }
 }
@@ -573,55 +576,167 @@ mod test {
         }
     }
 
+    use crate::pugl::pffi as rffi;
+
+    fn setup_expectations() -> Vec<Box<dyn Drop>> {
+        let mut expectations: Vec<Box<dyn Drop>> = Vec::new();
+
+        let ctx_new_world = Box::new(pffi::puglNewWorld_context());
+        ctx_new_world.expect()
+            .times(1)
+            .returning(|_, _| unsafe {
+                rffi::puglNewWorld(p::PuglWorldType_PUGL_PROGRAM, 0)
+            });
+        expectations.push(ctx_new_world);
+
+        let ctx_new_view = Box::new(pffi::puglNewView_context());
+        ctx_new_view.expect()
+            .times(1)
+            .returning(|world| unsafe {
+                rffi::puglNewView(world)});
+        expectations.push(ctx_new_view);
+
+        let ctx_set_handle = Box::new(pffi::puglSetHandle_context());
+        ctx_set_handle.expect()
+            .returning(|view, handle| unsafe {
+                rffi::puglSetHandle(view, handle)
+            });
+        expectations.push(ctx_set_handle);
+
+        let ctx_set_event_func = Box::new(pffi::puglSetEventFunc_context());
+        ctx_set_event_func.expect()
+            .returning(|view, func| unsafe {
+                rffi::puglSetEventFunc(view, func)
+            });
+        expectations.push(ctx_set_event_func);
+
+        let ctx_stub_backend = Box::new(pffi::puglStubBackend_context());
+        ctx_stub_backend.expect()
+            .returning(|| unsafe {
+                rffi::puglStubBackend()
+            });
+        expectations.push(ctx_stub_backend);
+
+        let ctx_set_backend = Box::new(pffi::puglSetBackend_context());
+        ctx_set_backend.expect()
+            .returning(|view, backend| unsafe {
+                rffi::puglSetBackend(view, backend)
+            });
+        expectations.push(ctx_set_backend);
+
+        let ctx_set_view_hint = Box::new(pffi::puglSetViewHint_context());
+        ctx_set_view_hint.expect()
+            .returning(|view, hint, value| unsafe {
+                rffi::puglSetViewHint(view, hint, value)
+            });
+        expectations.push(ctx_set_view_hint);
+
+        let ctx_get_view_hint = Box::new(pffi::puglGetViewHint_context());
+        ctx_get_view_hint.expect()
+            .returning(|view, hint| unsafe {
+                rffi::puglGetViewHint(view, hint)
+            });
+        expectations.push(ctx_get_view_hint);
+
+        let ctx_get_handle = Box::new(pffi::puglGetHandle_context());
+        ctx_get_handle.expect()
+            .returning(|view| unsafe {
+                rffi::puglGetHandle(view)
+            });
+        expectations.push(ctx_get_handle);
+
+        let ctx_get_world = Box::new(pffi::puglGetWorld_context());
+        ctx_get_world.expect()
+            .returning(|_| std::ptr::null_mut());
+        expectations.push(ctx_get_world);
+
+        let ctx_free_view = Box::new(pffi::puglFreeView_context());
+        ctx_free_view.expect()
+            .times(1)
+            .return_const(());
+        expectations.push(ctx_free_view);
+
+        let ctx_free_world = Box::new(pffi::puglFreeWorld_context());
+        ctx_free_world.expect()
+            .times(1)
+            .return_const(());
+        expectations.push(ctx_free_world);
+
+        expectations
+    }
+
+    fn setup_set_size_expectation() -> Box<dyn Drop> {
+        let ctx = Box::new(pffi::puglSetDefaultSize_context());
+        ctx.expect()
+            .withf(|_, &w, &h| w == 42 && h == 23)
+            .times(1)
+            .returning(|view, width, height| unsafe {
+                rffi::puglSetDefaultSize(view, width, height)
+            });
+        ctx
+    }
+
     #[test]
     #[serial]
     fn unresizable() {
+        let _expectations = setup_expectations();
+        let _set_size_expectation = setup_set_size_expectation();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
 
         ui.set_default_size(42, 23);
-        ui.show_window();
         assert!(!ui.is_resizable());
     }
 
     #[test]
     #[serial]
     fn resizable() {
+        let _expectations = setup_expectations();
+        let _set_size_expectation = setup_set_size_expectation();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
 
         ui.set_default_size(42, 23);
         ui.make_resizable();
-        ui.show_window();
         assert!(ui.is_resizable())
     }
 
     #[test]
     #[serial]
     fn not_ignore_key_repeat() {
+        let _expectations = setup_expectations();
+        let _set_size_expectation = setup_set_size_expectation();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
 
         ui.set_default_size(42, 23);
         ui.set_ignore_key_repeats(ViewHintBool::False);
-        ui.show_window();
+
         assert_eq!(ui.is_ignoring_key_repeats(), ViewHintBool::False);
     }
 
     #[test]
     #[serial]
     fn ignore_key_repeat() {
+        let _expectations = setup_expectations();
+        let _set_size_expectation = setup_set_size_expectation();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
 
         ui.set_default_size(42, 23);
-        ui.show_window();
+
         assert_eq!(ui.is_ignoring_key_repeats(), ViewHintBool::True);
     }
 
     #[serial]
     #[test]
     fn red_bits() {
+        let _expectations = setup_expectations();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.red_bits(), 8);
@@ -630,6 +745,8 @@ mod test {
     #[serial]
     #[test]
     fn green_bits() {
+        let _expectations = setup_expectations();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.green_bits(), 8);
@@ -638,6 +755,8 @@ mod test {
     #[serial]
     #[test]
     fn blue_bits() {
+        let _expectations = setup_expectations();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.blue_bits(), 8);
@@ -646,6 +765,8 @@ mod test {
     #[serial]
     #[test]
     fn alpha_bits() {
+        let _expectations = setup_expectations();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.alpha_bits(), 8);
@@ -654,6 +775,8 @@ mod test {
     #[serial]
     #[test]
     fn depth_bits() {
+        let _expectations = setup_expectations();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.depth_bits(), 0);
@@ -662,6 +785,8 @@ mod test {
     #[serial]
     #[test]
     fn stencil_bits() {
+        let _expectations = setup_expectations();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.stencil_bits(), 0);
@@ -670,6 +795,8 @@ mod test {
     #[serial]
     #[test]
     fn samples() {
+        let _expectations = setup_expectations();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.samples(), 0);
@@ -678,6 +805,8 @@ mod test {
     #[serial]
     #[test]
     fn double_buffer() {
+        let _expectations = setup_expectations();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.double_buffer(), true);
@@ -688,22 +817,55 @@ mod test {
     #[serial]
     #[test]
     fn swap_interaval() {
+        let _expectations = setup_expectations();
+        let _set_size_expectation = setup_set_size_expectation();
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.swap_interval(), ViewHintInt::DontCare);
         ui.set_default_size(42, 23);
-        ui.show_window();
+
         assert_eq!(ui.swap_interval(), ViewHintInt::DontCare);
     }
 
     #[serial]
     #[test]
     fn refresh_rate() {
+        let _expectations = setup_expectations();
+        let _set_size_expectation = setup_set_size_expectation();
+
+        let ctx = pffi::puglShowWindow_context();
+        ctx.expect()
+            .returning(|view| unsafe {
+                rffi::puglShowWindow(view)
+            });
+
         let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
         let ui = view.handle();
         assert_eq!(ui.refresh_rate(), ViewHintInt::DontCare);
         ui.set_default_size(42, 23);
         ui.show_window();
         assert_ne!(ui.refresh_rate(), ViewHintInt::DontCare);
+    }
+
+    #[test]
+    #[serial]
+    #[should_panic(expected = "window title must not contain 0 bytes: NulError(3, [102, 111, 111, 0, 98, 97, 114])")]
+    fn set_window_title() {
+        let _expectations = setup_expectations();
+
+        let ctx = pffi::puglSetWindowTitle_context();
+        ctx.expect().withf(|_, &raw| {
+            let test_cstr = unsafe {
+                std::ffi::CString::from_raw(raw as *mut std::os::raw::c_char)
+            };
+            let expected = std::ffi::CString::new("foo".as_bytes());
+            test_cstr == expected.unwrap()
+        }).times(1)
+            .return_const(p::PuglStatus_PUGL_SUCCESS);
+
+        let mut view = PuglView::<UI>::new(std::ptr::null_mut(), |pv| UI::new(pv));
+        let ui = view.handle();
+        ui.set_window_title("foo\0bar");
     }
 }

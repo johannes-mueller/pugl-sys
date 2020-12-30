@@ -137,6 +137,11 @@ extern crate bitflags;
 #[macro_use]
 extern crate serial_test;
 
+#[cfg(test)]
+extern crate mockall;
+
+extern crate mockall_double;
+
 #[doc(hidden)]
 pub(crate) mod pugl;
 
